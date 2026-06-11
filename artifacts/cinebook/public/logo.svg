@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="40" viewBox="0 0 160 40">
+  <rect width="160" height="40" rx="8" fill="transparent"/>
+  <circle cx="8" cy="20" r="5" fill="#1e88e5"/>
+  <circle cx="8" cy="20" r="2.5" fill="white"/>
+  <text x="18" y="26" font-family="Space Grotesk, Arial, sans-serif" font-weight="700" font-size="16" fill="white" letter-spacing="-0.5">MOVI KOVA</text>
+</svg>

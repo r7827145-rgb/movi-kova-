@@ -1,0 +1,392 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+@layer theme, base, clerk, components, utilities;
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card-border: hsl(var(--card-border));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover-border: hsl(var(--popover-border));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --font-sans: var(--app-font-sans);
+  --font-serif: var(--app-font-serif);
+  --font-mono: var(--app-font-mono);
+  --font-display: var(--font-display);
+
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
+}
+
+:root {
+  --hs-bg: #0f0f0f;
+  --hs-bg-2: #1a1a2e;
+  --hs-bg-3: #16213e;
+  --hs-blue: #c62828;
+  --hs-blue-light: #f84464;
+  --hs-blue-glow: #ff6b8a;
+  --hs-yellow: #ffc107;
+  --hs-red: #e53935;
+  --hs-white: #ffffff;
+  --hs-text-primary: #f5f5f5;
+  --hs-text-secondary: #9e9e9e;
+  --hs-border: rgba(255,255,255,0.08);
+
+  --background: 0 0% 6%;
+  --foreground: 0 0% 96%;
+  --card: 225 28% 14%;
+  --card-foreground: 0 0% 96%;
+  --card-border: 0 0% 100% / 0.08;
+  --popover: 225 28% 14%;
+  --popover-foreground: 0 0% 96%;
+  --popover-border: 0 0% 100% / 0.08;
+  --primary: 348 93% 61%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 225 36% 18%;
+  --secondary-foreground: 0 0% 96%;
+  --muted: 225 36% 18%;
+  --muted-foreground: 0 0% 62%;
+  --accent: 348 93% 61%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 70% 55%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 100% / 0.08;
+  --input: 225 28% 20%;
+  --ring: 348 93% 61%;
+  --radius: 0.5rem;
+
+  --sidebar: 225 36% 12%;
+  --sidebar-foreground: 0 0% 96%;
+  --sidebar-border: 0 0% 100% / 0.08;
+  --sidebar-primary: 213 80% 43%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 225 28% 18%;
+  --sidebar-accent-foreground: 0 0% 96%;
+  --sidebar-ring: 213 80% 43%;
+
+  --chart-1: 213 80% 43%;
+  --chart-2: 45 93% 58%;
+  --chart-3: 0 70% 55%;
+  --chart-4: 160 60% 45%;
+  --chart-5: 280 60% 55%;
+
+  --app-font-sans: 'Inter', sans-serif;
+  --app-font-serif: Georgia, serif;
+  --app-font-mono: Menlo, monospace;
+  --font-display: 'Space Grotesk', sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply font-sans antialiased;
+    background-color: #0f0f0f;
+    color: #f5f5f5;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight;
+  }
+}
+
+/* Hero gradients */
+.hero-gradient {
+  background: linear-gradient(
+    to right,
+    rgba(15, 15, 15, 0.95) 30%,
+    rgba(15, 15, 15, 0.5) 65%,
+    transparent 100%
+  );
+}
+.hero-gradient-bottom {
+  background: linear-gradient(to top, #0f0f0f 0%, transparent 60%);
+}
+
+/* Carousel scroll */
+.carousel-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+.carousel-scroll::-webkit-scrollbar { display: none; }
+
+/* Glassmorphism card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.glass-card-dark {
+  background: rgba(198, 40, 40, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(248, 68, 100, 0.2);
+  box-shadow: 0 8px 32px rgba(198, 40, 40, 0.15), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.glass-navbar {
+  background: rgba(13, 17, 23, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.glass-modal {
+  background: rgba(26, 26, 46, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(248, 68, 100, 0.2);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6), 0 0 60px rgba(198, 40, 40, 0.1);
+}
+
+/* Card hover glow */
+.movie-card-hs:hover {
+  transform: scale(1.04);
+  transition: transform 0.2s ease;
+  box-shadow: 0 0 0 2px #f84464, 0 8px 32px rgba(248, 68, 100, 0.3);
+}
+
+/* Blue gradient button */
+.btn-hs-primary {
+  background: linear-gradient(135deg, #c62828 0%, #f84464 100%);
+  color: white;
+  border: none;
+  padding: 10px 28px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.15s;
+}
+.btn-hs-primary:hover { opacity: 0.9; }
+
+/* Section title */
+.section-title-hs {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f5f5f5;
+  letter-spacing: -0.01em;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-title-hs::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(180deg, #f84464, #c62828);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* Seat states */
+.seat-available { fill: #333; stroke: #555; }
+.seat-selected { fill: #c62828; stroke: #f84464; }
+.seat-booked { fill: #2a2a2a; stroke: #1a1a1a; cursor: not-allowed; }
+
+/* Clerk form field placeholder */
+.cl-formFieldInput::placeholder { color: #9e9e9e; opacity: 1; }
+
+/* BMS-style tag/chip */
+.bms-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #d0d0d0;
+  background: rgba(255,255,255,0.06);
+  letter-spacing: 0.02em;
+}
+
+/* BMS-style rating badge */
+.bms-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #1a3a2a;
+  border: 1px solid #2d6a4f;
+  color: #52b788;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+
+/* BMS red category tab active */
+.bms-tab-active {
+  color: #f84464;
+  border-bottom: 2px solid #f84464;
+  font-weight: 700;
+}
+.bms-tab {
+  color: #9e9e9e;
+  border-bottom: 2px solid transparent;
+  font-weight: 500;
+  transition: all 0.15s;
+  padding-bottom: 2px;
+}
+.bms-tab:hover { color: #f5f5f5; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   LIGHT THEME OVERRIDES
+   Applied via next-themes when html.light is set
+   Palette: bg #f0f4ff · surface #e6edf8 · card #d8e3f4 · text #0d1117
+═══════════════════════════════════════════════════════════════════ */
+
+html.light {
+  color-scheme: light;
+}
+
+html.light body {
+  background-color: #f0f4ff;
+  color: #0d1117;
+}
+
+/* — Smooth theme transitions — */
+html.light *,
+html.dark * {
+  transition: background-color 0.25s ease, border-color 0.2s ease, color 0.2s ease;
+}
+/* But NOT transitions on SVGs or transforms (breaks animations) */
+html.light svg *,
+html.dark svg * {
+  transition: none;
+}
+
+/* ── Background remaps (Tailwind arbitrary values appear literally in class attr) ── */
+html.light [class*="bg-[#0f0f0f]"]         { background-color: #f0f4ff !important; }
+html.light [class*="bg-[#0d1117]"]         { background-color: #e6edf8 !important; }
+html.light [class*="bg-[#1a1a2e]"]         { background-color: #d8e3f4 !important; }
+html.light [class*="bg-[#16213e]"]         { background-color: #cad6ed !important; }
+html.light [class*="bg-[#1a2a4a]"]         { background-color: #bed0e8 !important; }
+html.light [class*="bg-[#0f0f1a]"]         { background-color: #eaf0ff !important; }
+html.light [class*="bg-[#1e88e5]/"]        { /* keep blue accents */              }
+html.light [class*="bg-[#1565c0]/"]        { /* keep blue accents */              }
+html.light [class*="bg-black\/70"]         { background-color: rgba(200,215,240,0.82) !important; }
+html.light [class*="bg-black\/60"]         { background-color: rgba(210,222,245,0.75) !important; }
+html.light [class*="bg-white\/\[0.03\]"]   { background-color: rgba(0,0,0,0.03)   !important; }
+html.light [class*="bg-white\/\[0.05\]"]   { background-color: rgba(0,0,0,0.04)   !important; }
+html.light [class*="bg-white\/\[0.06\]"]   { background-color: rgba(0,0,0,0.05)   !important; }
+html.light [class*="bg-white\/8"]          { background-color: rgba(0,0,0,0.05)   !important; }
+
+/* ── Text remaps ── */
+html.light .text-white                { color: #0d1117 !important; }
+html.light .text-gray-200             { color: #2d3a52 !important; }
+html.light .text-gray-300             { color: #435069 !important; }
+html.light .text-gray-400             { color: #5d6e87 !important; }
+html.light .text-gray-500             { color: #8595a8 !important; }
+html.light [class*="text-\[#f5f5f5\]"]{ color: #0d1117 !important; }
+html.light [class*="text-\[#9e9e9e\]"]{ color: #7a8899 !important; }
+
+/* Preserve white text on gradient/colored buttons & badges */
+html.light button[style*="linear-gradient"]      { color: #ffffff !important; }
+html.light button[style*="background"]           { color: #ffffff !important; }
+html.light [class*="from-[#c62828]"]             { color: #ffffff !important; }
+html.light [class*="from-[#1565c0]"]             { color: #ffffff !important; }
+html.light .btn-hs-primary                       { color: #ffffff !important; }
+/* Score badge (number in blue) */
+html.light [class*="text-\[#42a5f5\]"]           { /* keep blue - fine on light */ }
+
+/* ── Border remaps ── */
+html.light [class*="border-white\/"]             { border-color: rgba(13,30,80,0.10) !important; }
+html.light [class*="border-white\/5"]            { border-color: rgba(13,30,80,0.05) !important; }
+html.light [class*="border-white\/20"]           { border-color: rgba(13,30,80,0.15) !important; }
+html.light [class*="border-white\/10"]           { border-color: rgba(13,30,80,0.10) !important; }
+
+/* ── Placeholder text ── */
+html.light .placeholder-gray-500::placeholder    { color: #9aa5b8 !important; }
+
+/* ── Custom utility class overrides ── */
+html.light .glass-navbar {
+  background: rgba(235, 241, 255, 0.93) !important;
+  border-bottom-color: rgba(13,30,80,0.07) !important;
+  box-shadow: 0 1px 0 rgba(13,30,80,0.06);
+}
+html.light .glass-card {
+  background: rgba(255,255,255,0.75) !important;
+  border-color: rgba(13,30,80,0.10) !important;
+  box-shadow: 0 8px 32px rgba(13,30,80,0.08), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+}
+html.light .glass-card-dark {
+  background: rgba(198,40,40,0.06) !important;
+  border-color: rgba(248,68,100,0.2) !important;
+}
+html.light .glass-modal {
+  background: rgba(235,241,255,0.96) !important;
+  border-color: rgba(198,40,40,0.2) !important;
+  box-shadow: 0 24px 80px rgba(13,30,80,0.15) !important;
+}
+
+/* ── Gradients ── */
+html.light .hero-gradient {
+  background: linear-gradient(
+    to right,
+    rgba(240, 244, 255, 0.96) 30%,
+    rgba(240, 244, 255, 0.65) 65%,
+    transparent 100%
+  ) !important;
+}
+html.light .hero-gradient-bottom {
+  background: linear-gradient(to top, #f0f4ff 0%, transparent 60%) !important;
+}
+
+/* ── Typography / Chips / Tabs ── */
+html.light .section-title-hs          { color: #0d1117 !important; }
+html.light .bms-chip                  { background: rgba(0,0,0,0.05) !important; border-color: rgba(0,0,0,0.12) !important; color: #4a5568 !important; }
+html.light .bms-tab                   { color: #5d6e87 !important; }
+html.light .bms-tab:hover             { color: #0d1117 !important; }
+html.light .bms-rating                { background: #d8f0e4 !important; border-color: #8cc9a8 !important; color: #276843 !important; }
+
+/* ── Seat map ── */
+html.light .seat-available            { fill: #d0dbf0; stroke: #aab8d8; }
+html.light .seat-booked               { fill: #e8ecf5; stroke: #c8d0e0; }
+

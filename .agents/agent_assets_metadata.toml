@@ -1,0 +1,38 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "NU8d-jET5CicqeDFUDRwC"
+uri = "file://artifacts/cinebook/public/posters/dune3.png"
+type = "image"
+title = "Dune 3 Sci-Fi Poster"
+
+[[generated]]
+id = "Xc95pKf1Vp-VY3RcFsnTL"
+uri = "file://artifacts/cinebook/public/posters/missionx.png"
+type = "image"
+title = "Mission Action Poster"
+
+[[generated]]
+id = "dQtUetnB6ay6N712tM3no"
+uri = "file://artifacts/cinebook/public/posters/andromeda.png"
+type = "image"
+title = "Andromeda Sci-Fi Poster"
+
+[[generated]]
+id = "STmM1tQKPL34sN2gdUIz7"
+uri = "file://artifacts/cinebook/public/posters/phantom.png"
+type = "image"
+title = "Phantom Thriller Poster"
+
+[[generated]]
+id = "BLxHdzbCol8EAgq17-7rM"
+uri = "file://artifacts/cinebook/public/posters/solstice.png"
+type = "image"
+title = "Solstice Drama Poster"
+
+[[generated]]
+id = "_KK_NgYtefF-BNFl0qyQZ"
+uri = "file://artifacts/cinebook/public/posters/ironclad.png"
+type = "image"
+title = "Ironclad Historical Poster"
