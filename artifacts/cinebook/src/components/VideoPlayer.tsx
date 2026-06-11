@@ -150,6 +150,11 @@ export default function VideoPlayer({ src, title, posterUrl, onBack }: VideoPlay
     v.addEventListener("ended", onEnded);
     v.addEventListener("error", onError);
     v.addEventListener("stalled", onStalled);
+
+    // If metadata is already loaded by the time we register the listener
+    if (v.readyState >= 1) {
+      onMeta();
+    }
     return () => {
       v.removeEventListener("timeupdate", onTime);
       v.removeEventListener("loadedmetadata", onMeta);
