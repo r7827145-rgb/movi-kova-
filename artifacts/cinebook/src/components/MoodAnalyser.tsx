@@ -81,10 +81,16 @@ async function blobToBase64(blob: Blob): Promise<string> {
 }
 
 async function callMoodAPI(payload: Record<string, unknown>): Promise<MoodResult> {
+  const catalog = getAllMovies().map(m => ({
+    id: m.id,
+    title: m.title,
+    genres: m.genre,
+    director: m.director,
+  }));
   const res = await fetch(`${BASE}/api/ai/mood`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ ...payload, catalog }),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: "Unknown error" }));

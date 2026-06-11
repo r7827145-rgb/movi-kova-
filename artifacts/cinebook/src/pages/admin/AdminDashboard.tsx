@@ -109,6 +109,7 @@ function MovieEditorModal({ onSave, onClose, initial }: {
       isStreamable: !!form.isStreamable,
       isPremium: !!form.isPremium,
       streamUrl: form.streamUrl || "",
+      score: Math.max(0, Math.min(100, Number(form.score) || 0)),
     } as CustomMovie);
   };
 
@@ -126,7 +127,7 @@ function MovieEditorModal({ onSave, onClose, initial }: {
             ["Backdrop URL", "backdropUrl", "text"]] as [string, keyof CustomMovie, string][]).map(([label, key, type]) => (
             <div key={key}>
               <label className="text-[11px] text-gray-400 uppercase tracking-wider mb-1 block">{label}</label>
-              <input type={type} value={(form[key] as string | undefined) || ""}
+              <input type={type} value={key === "genre" && Array.isArray(form.genre) ? form.genre.join(", ") : (form[key] as string | undefined) || ""}
                 onChange={e => set(key, e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#f84464]"
               />

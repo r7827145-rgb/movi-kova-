@@ -5,6 +5,7 @@ import { movies as seedMovies } from "@/data/movies";
 import {
   getSession, getBookings, getTheaters, getTheaterRevenue,
   Booking, Theater, MovieRequest, submitMovieRequest, getMovieRequests,
+  getAllMovies,
 } from "@/lib/adminData";
 import { ScanLine, Ticket, TrendingUp, Film, Plus, X, Check, Clock, XCircle, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -52,7 +53,7 @@ export default function TheaterDashboard() {
       rating: reqForm.rating,
       year: reqForm.year,
       duration: reqForm.duration,
-      score: reqForm.score,
+      score: Math.max(0, Math.min(100, Number(reqForm.score) || 0)),
       director: reqForm.director,
       posterUrl: reqForm.posterUrl,
       backdropUrl: reqForm.backdropUrl,
@@ -72,9 +73,10 @@ export default function TheaterDashboard() {
   };
 
   const assignedMovieIds = theater?.moviesAssigned || [];
+  const allMovies = getAllMovies();
   const myMovies = [
-    ...seedMovies.filter(m => assignedMovieIds.includes(m.id)),
-    ...seedMovies.filter(m => m.isNowShowing).slice(0, 3),
+    ...allMovies.filter(m => assignedMovieIds.includes(m.id) || m.theaterId === theaterId),
+    ...allMovies.filter(m => m.isNowShowing).slice(0, 3),
   ].filter((m, i, arr) => arr.findIndex(x => x.id === m.id) === i);
 
   const filteredBookings = bookings.filter(b =>

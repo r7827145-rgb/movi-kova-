@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { Camera, Upload, X, Loader2, Ticket, AlertCircle, ScanLine, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
+import { getAllMovies } from "../lib/adminData";
 
 interface ScanResult {
   matched: boolean;
@@ -20,10 +21,16 @@ interface PosterScannerProps {
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 async function scanPoster(imageBase64: string, mimeType: string): Promise<ScanResult> {
+  const catalog = getAllMovies().map(m => ({
+    id: m.id,
+    title: m.title,
+    genres: m.genre,
+    director: m.director,
+  }));
   const res = await fetch(`${BASE}/api/ai/scan-poster`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ imageBase64, mimeType }),
+    body: JSON.stringify({ imageBase64, mimeType, catalog }),
   });
   if (!res.ok) throw new Error("Scan failed");
   return res.json();

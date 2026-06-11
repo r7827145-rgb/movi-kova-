@@ -1,6 +1,7 @@
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useState, useRef, useEffect } from "react";
 import { Send, Loader2, ScanLine } from "lucide-react";
+import { getAllMovies } from "@/lib/adminData";
 
 interface Message {
   id: string;
@@ -20,10 +21,16 @@ async function fetchAIReply(
   message: string,
   history: { role: "user" | "assistant"; content: string }[]
 ): Promise<string> {
+  const catalog = getAllMovies().map(m => ({
+    id: m.id,
+    title: m.title,
+    genres: m.genre,
+    director: m.director,
+  }));
   const res = await fetch(`${BASE}/api/ai/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, messages: history }),
+    body: JSON.stringify({ message, messages: history, catalog }),
   });
   if (!res.ok) throw new Error("AI request failed");
   const data = await res.json();

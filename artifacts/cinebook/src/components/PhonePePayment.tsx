@@ -23,6 +23,8 @@ export default function PhonePePayment({ amount, description, onSuccess, onClose
   const [cardNumber, setCardNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCvv, setCardCvv] = useState("");
+  const [cardHolder, setCardHolder] = useState("");
+  const [cardError, setCardError] = useState("");
 
   // Timer countdown during processing
   useEffect(() => {
@@ -53,8 +55,24 @@ export default function PhonePePayment({ amount, description, onSuccess, onClose
       setUpiError("Enter a valid UPI ID (e.g. name@upi)");
       return;
     }
-    if (method === "card" && (cardNumber.length < 16 || !cardExpiry || !cardCvv)) {
-      return;
+    if (method === "card") {
+      if (cardNumber.length < 16) {
+        setCardError("Card number must be 16 digits");
+        return;
+      }
+      if (!cardExpiry || cardExpiry.length < 5) {
+        setCardError("Enter a valid expiry date (MM/YY)");
+        return;
+      }
+      if (cardCvv.length < 3) {
+        setCardError("CVV must be 3 or 4 digits");
+        return;
+      }
+      if (!cardHolder.trim() || cardHolder.trim().length < 3) {
+        setCardError("Cardholder name must be at least 3 characters");
+        return;
+      }
+      setCardError("");
     }
     setUpiError("");
     setTimer(30);
@@ -164,11 +182,21 @@ export default function PhonePePayment({ amount, description, onSuccess, onClose
               {method === "card" && (
                 <div className="space-y-3">
                   <div>
+                    <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Cardholder Name</label>
+                    <input
+                      type="text"
+                      value={cardHolder}
+                      onChange={(e) => { setCardHolder(e.target.value); setCardError(""); }}
+                      placeholder="e.g. Rahul Sharma"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#6739B7]"
+                    />
+                  </div>
+                  <div>
                     <label className="text-xs text-gray-400 uppercase tracking-wider mb-1.5 block">Card Number</label>
                     <input
                       type="text"
                       value={cardNumber}
-                      onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, "").slice(0, 16))}
+                      onChange={(e) => { setCardNumber(e.target.value.replace(/\D/g, "").slice(0, 16)); setCardError(""); }}
                       placeholder="1234 5678 9012 3456"
                       className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#6739B7] font-mono tracking-wider"
                     />
@@ -187,6 +215,7 @@ export default function PhonePePayment({ amount, description, onSuccess, onClose
                             val = val.slice(0, 2);
                           }
                           setCardExpiry(val);
+                          setCardError("");
                         }}
                         placeholder="MM/YY"
                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#6739B7] font-mono"
@@ -197,12 +226,13 @@ export default function PhonePePayment({ amount, description, onSuccess, onClose
                       <input
                         type="password"
                         value={cardCvv}
-                        onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                        onChange={(e) => { setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4)); setCardError(""); }}
                         placeholder="•••"
                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#6739B7] font-mono"
                       />
                     </div>
                   </div>
+                  {cardError && <p className="text-red-400 text-xs mt-1.5">{cardError}</p>}
                 </div>
               )}
 

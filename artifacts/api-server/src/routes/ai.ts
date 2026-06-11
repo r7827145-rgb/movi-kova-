@@ -14,13 +14,14 @@ const MOVIES = [
   { id: "ironclad", title: "IRONCLAD", genres: ["action", "history"], director: "Ridley Scott" },
 ];
 
-const MOVIE_LIST_FOR_PROMPT = MOVIES.map(m => `- id: "${m.id}", title: "${m.title}", genres: [${m.genres.join(", ")}]`).join("\n");
-const MOVIE_LIST_FOR_PROMPT_POSTER = MOVIES.map(m => `- id: "${m.id}", title: "${m.title}"`).join("\n");
+function getMoodSystemPrompt(catalog?: any[]): string {
+  const activeMovies = catalog && catalog.length ? catalog : MOVIES;
+  const movieCatalogPrompt = activeMovies.map(m => `- id: "${m.id}", title: "${m.title}", genres: [${(m.genres || m.genre || []).join(", ")}]`).join("\n");
 
-const MOOD_SYSTEM_PROMPT = `You are a mood-based movie recommendation AI for Movi Kova cinema.
+  return `You are a mood-based movie recommendation AI for Movi Kova cinema.
 
 Our catalogue:
-${MOVIE_LIST_FOR_PROMPT}
+${movieCatalogPrompt}
 
 Mood → Genre mapping rules:
 - happy → comedy, animation, musical, feel-good drama
@@ -37,6 +38,7 @@ Mood → Genre mapping rules:
 For suggested_movies: prefer our catalogue first (use the id field when suggesting one of our movies, leave id empty for external suggestions). Score = 0.6*mood_match + 0.3*genre_fit + 0.1*popularity.
 
 Always return ONLY valid JSON, no other text.`;
+}
 
 const MOOD_OUTPUT_SCHEMA = `Return exactly this JSON schema:
 {
@@ -50,12 +52,12 @@ const MOOD_OUTPUT_SCHEMA = `Return exactly this JSON schema:
 }
 Max 5 suggested_movies. No links. No extra text outside JSON.`;
 
-async function analyzeTextMood(text: string): Promise<Record<string, unknown>> {
+async function analyzeTextMood(text: string, catalog?: any[]): Promise<Record<string, unknown>> {
   const completion = await groq.chat.completions.create({
     model: "llama-3.3-70b-versatile",
     max_tokens: 600,
     messages: [
-      { role: "system", content: `${MOOD_SYSTEM_PROMPT}\n\n${MOOD_OUTPUT_SCHEMA}` },
+      { role: "system", content: `${getMoodSystemPrompt(catalog)}\n\n${MOOD_OUTPUT_SCHEMA}` },
       { role: "user", content: `Analyze this mood description and return the JSON:\n\n"${text}"` },
     ],
   });
@@ -67,7 +69,7 @@ async function analyzeTextMood(text: string): Promise<Record<string, unknown>> {
   return parsed;
 }
 
-async function analyzeImageMood(imageBase64: string, mimeType: string): Promise<Record<string, unknown>> {
+async function analyzeImageMood(imageBase64: string, mimeType: string, catalog?: any[]): Promise<Record<string, unknown>> {
   const dataUrl = `data:${mimeType || "image/jpeg"};base64,${imageBase64}`;
 
   const response = await groq.chat.completions.create({
@@ -76,7 +78,7 @@ async function analyzeImageMood(imageBase64: string, mimeType: string): Promise<
     messages: [
       {
         role: "system",
-        content: `${MOOD_SYSTEM_PROMPT}\n\n${MOOD_OUTPUT_SCHEMA}\n\nAnalyze only facial expression. Privacy: image is ephemeral, not stored.`,
+        content: `${getMoodSystemPrompt(catalog)}\n\n${MOOD_OUTPUT_SCHEMA}\n\nAnalyze only facial expression. Privacy: image is ephemeral, not stored.`,
       },
       {
         role: "user",
@@ -148,12 +150,14 @@ function fuseMoodResults(results: Record<string, unknown>[]): Record<string, unk
 
 router.post("/scan-poster", async (req, res) => {
   try {
-    const { imageBase64, mimeType } = req.body as { imageBase64?: string; mimeType?: string };
+    const { imageBase64, mimeType, catalog } = req.body as { imageBase64?: string; mimeType?: string; catalog?: any[] };
 
     if (!imageBase64) {
       return res.status(400).json({ error: "imageBase64 is required" });
     }
 
+    const activeMovies = catalog && catalog.length ? catalog : MOVIES;
+    const movieCatalogPrompt = activeMovies.map(m => `- id: "${m.id}", title: "${m.title}"`).join("\n");
     const dataUrl = `data:${mimeType || "image/jpeg"};base64,${imageBase64}`;
 
     const response = await groq.chat.completions.create({
@@ -166,7 +170,7 @@ router.post("/scan-poster", async (req, res) => {
 Your job is to look at an image and determine if it matches one of our listed movies.
 
 Available movies:
-${MOVIE_LIST_FOR_PROMPT_POSTER}
+${movieCatalogPrompt}
 
 Rules:
 - If you can identify a movie from the image that matches one of our movies, respond with JSON: {"matched": true, "movieId": "<id>", "movieTitle": "<title>", "confidence": "high|medium|low", "reason": "<brief explanation>"}
@@ -203,20 +207,24 @@ Rules:
 
 router.post("/chat", async (req, res) => {
   try {
-    const { messages: history, message } = req.body as {
+    const { messages: history, message, catalog } = req.body as {
       messages: { role: "user" | "assistant"; content: string }[];
       message: string;
+      catalog?: any[];
     };
 
     if (!message) {
       return res.status(400).json({ error: "message is required" });
     }
 
+    const activeMovies = catalog && catalog.length ? catalog : MOVIES;
+    const movieCatalogPrompt = activeMovies.map(m => `- "${m.title}" (id: ${m.id}) — genres: ${(m.genres || m.genre || []).join(", ")}`).join("\n");
+
     const systemPrompt = `You are an expert cinematic concierge AI for Movi Kova, a premium movie ticket booking platform.
 You help users discover movies, pick the right format, choose seats, and navigate the booking experience.
 
 Currently showing movies:
-${MOVIES.map(m => `- "${m.title}" (id: ${m.id}) — genres: ${m.genres.join(", ")}`).join("\n")}
+${movieCatalogPrompt}
 
 Personality: Sophisticated, knowledgeable about cinema, enthusiastic but not pushy. Keep responses concise (2-4 sentences max).
 When recommending a specific movie we have, always mention its title naturally.
@@ -249,7 +257,7 @@ If user asks to book or go to a movie, say: "Tap the poster on the home screen o
 
 router.post("/mood", async (req, res) => {
   try {
-    const { type, text, imageBase64, mimeType, audioBase64, audioMimeType, recentWatched } = req.body as {
+    const { type, text, imageBase64, mimeType, audioBase64, audioMimeType, recentWatched, catalog } = req.body as {
       type: "text" | "image" | "voice" | "hybrid";
       text?: string;
       imageBase64?: string;
@@ -257,17 +265,18 @@ router.post("/mood", async (req, res) => {
       audioBase64?: string;
       audioMimeType?: string;
       recentWatched?: string[];
+      catalog?: any[];
     };
 
     let moodResult: Record<string, unknown>;
 
     if (type === "text") {
       if (!text) return res.status(400).json({ error: "text is required for type=text" });
-      moodResult = await analyzeTextMood(text);
+      moodResult = await analyzeTextMood(text, catalog);
 
     } else if (type === "image") {
       if (!imageBase64) return res.status(400).json({ error: "imageBase64 is required for type=image" });
-      moodResult = await analyzeImageMood(imageBase64, mimeType ?? "image/jpeg");
+      moodResult = await analyzeImageMood(imageBase64, mimeType ?? "image/jpeg", catalog);
 
     } else if (type === "voice") {
       if (!audioBase64) return res.status(400).json({ error: "audioBase64 is required for type=voice" });
@@ -280,13 +289,13 @@ router.post("/mood", async (req, res) => {
       if (!transcript.trim()) {
         transcript = "The person seems quiet or thoughtful.";
       }
-      moodResult = await analyzeTextMood(transcript);
+      moodResult = await analyzeTextMood(transcript, catalog);
       (moodResult as Record<string, unknown>).transcript = transcript;
 
     } else if (type === "hybrid") {
       const signals: Record<string, unknown>[] = [];
-      if (text) signals.push(await analyzeTextMood(text));
-      if (imageBase64) signals.push(await analyzeImageMood(imageBase64, mimeType ?? "image/jpeg"));
+      if (text) signals.push(await analyzeTextMood(text, catalog));
+      if (imageBase64) signals.push(await analyzeImageMood(imageBase64, mimeType ?? "image/jpeg", catalog));
       moodResult = fuseMoodResults(signals);
 
     } else {

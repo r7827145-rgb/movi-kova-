@@ -25,23 +25,32 @@ export default function AILauncher() {
     <>
       <div className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-40 flex flex-col items-end gap-3">
         <AnimatePresence>
-          {menuOpen && menuItems.map(item => {
-            const Icon = item.icon;
-            return (
-              <motion.button
-                key={item.key}
-                onClick={item.onClick}
-                initial={{ opacity: 0, y: 12, scale: 0.85 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 12, scale: 0.85 }}
-                transition={{ duration: 0.18, delay: item.delay }}
-                className="flex items-center gap-2.5 bg-[#16213e] border border-[#1e88e5]/40 text-white text-sm font-semibold px-4 py-2.5 rounded-full shadow-lg hover:bg-[#1a2a4a] transition-colors"
-              >
-                <Icon className="w-4 h-4 text-[#1e88e5]" />
-                {item.label}
-              </motion.button>
-            );
-          })}
+          {menuOpen && (
+            <motion.div 
+              initial="exit"
+              animate="enter"
+              exit="exit"
+              className="flex flex-col items-end gap-3"
+            >
+              {menuItems.map(item => {
+                const Icon = item.icon;
+                return (
+                  <motion.button
+                    key={item.key}
+                    onClick={item.onClick}
+                    initial={{ opacity: 0, y: 12, scale: 0.85 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 12, scale: 0.85 }}
+                    transition={{ duration: 0.18, delay: item.delay }}
+                    className="flex items-center gap-2.5 bg-[#16213e] border border-[#1e88e5]/40 text-white text-sm font-semibold px-4 py-2.5 rounded-full shadow-lg hover:bg-[#1a2a4a] transition-colors"
+                  >
+                    <Icon className="w-4 h-4 text-[#1e88e5]" />
+                    {item.label}
+                  </motion.button>
+                );
+              })}
+            </motion.div>
+          )}
         </AnimatePresence>
 
         <button
