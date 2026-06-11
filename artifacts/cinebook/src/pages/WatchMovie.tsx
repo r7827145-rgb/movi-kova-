@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation, Link } from "wouter";
 import { ArrowLeft, Lock, Sparkles, AlertTriangle } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -10,10 +10,33 @@ import { motion } from "framer-motion";
 
 export default function WatchMovie({ params }: { params: { id: string } }) {
   const [, setLocation] = useLocation();
-  const { toast } = { toast: (x: any) => console.log(x) }; // We can use useToast if available
+  const { toast } = useToast();
   const [movie, setMovie] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
+
+  const lastSavedMinuteRef = useRef<number>(-1);
+  const wasCompletedRef = useRef<boolean>(false);
+
+  const handleProgress = (progress: { currentTime: number; duration: number; percent: number }) => {
+    if (!movie) return;
+    const durationMinutes = Math.floor(progress.currentTime / 60);
+    const isCompleted = progress.percent > 90;
+
+    if (durationMinutes > lastSavedMinuteRef.current || (isCompleted && !wasCompletedRef.current)) {
+      lastSavedMinuteRef.current = durationMinutes;
+      if (isCompleted) {
+        wasCompletedRef.current = true;
+      }
+
+      addWatchHistory({
+        movieId: movie.id,
+        movieTitle: movie.title,
+        duration: durationMinutes,
+        completed: isCompleted,
+      });
+    }
+  };
 
   useEffect(() => {
     const all = getAllMovies();
@@ -86,6 +109,7 @@ export default function WatchMovie({ params }: { params: { id: string } }) {
             <VideoPlayer 
               src={(!movie.streamUrl || movie.streamUrl.includes("googleapis.com")) ? "https://vjs.zencdn.net/v/oceans.mp4" : movie.streamUrl} 
               title={movie.title}
+              onProgress={handleProgress}
             />
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center" 

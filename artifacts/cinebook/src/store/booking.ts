@@ -8,7 +8,7 @@ interface BookingState {
   fboCombos: FBOCombo[];
   
   setMovie: (m: Movie) => void;
-  setShowtime: (s: Showtime) => void;
+  setShowtime: (s: Showtime | null) => void;
   toggleSeat: (seatId: string) => void;
   addCombo: (c: FBOCombo) => void;
   removeCombo: (id: string) => void;

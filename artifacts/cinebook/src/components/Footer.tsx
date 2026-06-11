@@ -21,7 +21,7 @@ export default function Footer() {
 
         <div className="flex flex-col items-center md:items-end gap-2 text-xs">
           <div>© 2026 Movi Kova</div>
-          <Link href="/admin" className="text-gray-800 hover:text-gray-500 transition-colors">ADMIN</Link>
+          <Link href="/admin" className="text-gray-600 hover:text-[#f84464] transition-colors">ADMIN</Link>
         </div>
       </div>
     </footer>

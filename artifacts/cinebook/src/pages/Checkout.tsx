@@ -33,7 +33,16 @@ export default function Checkout() {
 
   if (!selectedMovie || !selectedShowtime) return null;
 
-  const ticketsPrice = selectedSeats.length * selectedShowtime.price;
+  const ticketsPrice = selectedSeats.reduce((sum, seat) => {
+    const row = seat.charAt(0).toUpperCase();
+    if (row === "A" || row === "B") {
+      return sum + Math.round(selectedShowtime.price * 0.65);
+    } else if (row === "C" || row === "D" || row === "E" || row === "F") {
+      return sum + Math.round(selectedShowtime.price * 0.80);
+    } else {
+      return sum + selectedShowtime.price;
+    }
+  }, 0);
   const snacksPrice = fboCombos.reduce((acc, c) => acc + (c.price * c.quantity), 0);
   const fee = 30 * selectedSeats.length;
   const total = ticketsPrice + snacksPrice + fee;
@@ -58,7 +67,7 @@ export default function Checkout() {
       hall: selectedShowtime!.hallName,
       seats: selectedSeats,
       total,
-      theaterId: "default",
+      theaterId: selectedMovie.theaterId || "default",
       timestamp: new Date().toISOString(),
       status: "CONFIRMED",
     });

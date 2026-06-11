@@ -162,12 +162,15 @@ export const toggleAutoRenew = (): UserSubscription | null => {
 
 export const isSubscribed = (): boolean => {
   const sub = getSubscription();
-  return sub?.status === "active";
+  if (!sub) return false;
+  if (sub.status === "active") return true;
+  if (sub.status === "cancelled" && new Date(sub.endDate) > new Date()) return true;
+  return false;
 };
 
 export const getCurrentPlan = (): SubscriptionPlan | null => {
   const sub = getSubscription();
-  if (!sub || sub.status !== "active") return null;
+  if (!sub || !isSubscribed()) return null;
   return SUBSCRIPTION_PLANS.find((p) => p.id === sub.planId) || null;
 };
 
@@ -220,11 +223,34 @@ export const getWatchHistory = (): WatchHistoryEntry[] => {
 };
 
 export const addWatchHistory = (entry: Omit<WatchHistoryEntry, "watchedAt">): void => {
-  const history = getWatchHistory();
-  history.unshift({ ...entry, watchedAt: new Date().toISOString() });
-  // Keep last 50 entries
+  let history = getWatchHistory();
+  const existingIndex = history.findIndex(h => h.movieId === entry.movieId);
+  let updatedEntry: WatchHistoryEntry = {
+    ...entry,
+    watchedAt: new Date().toISOString()
+  };
+  if (existingIndex >= 0) {
+    const existing = history[existingIndex];
+    updatedEntry.duration = entry.duration > 0 ? entry.duration : existing.duration;
+    updatedEntry.completed = entry.completed || existing.completed;
+    history.splice(existingIndex, 1);
+  }
+  history.unshift(updatedEntry);
   if (history.length > 50) history.length = 50;
   localStorage.setItem(WATCH_HISTORY_KEY, JSON.stringify(history));
+};
+
+export const updateWatchHistory = (movieId: string, duration: number, completed: boolean): void => {
+  let history = getWatchHistory();
+  const existing = history.find(h => h.movieId === movieId);
+  if (existing) {
+    existing.duration = duration;
+    existing.completed = completed || existing.completed;
+    existing.watchedAt = new Date().toISOString();
+    const filtered = history.filter(h => h.movieId !== movieId);
+    filtered.unshift(existing);
+    localStorage.setItem(WATCH_HISTORY_KEY, JSON.stringify(filtered));
+  }
 };
 
 // ─── Admin Subscription Stats ─────────────────────────────────────────────────

@@ -55,6 +55,8 @@ export default function QRScanner() {
         await videoRef.current.play();
         setActive(true);
         animRef.current = requestAnimationFrame(scan);
+      } else {
+        stream.getTracks().forEach(t => t.stop());
       }
     } catch {
       setCamError("Camera access denied or unavailable. Please allow camera permissions.");

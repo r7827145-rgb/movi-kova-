@@ -62,14 +62,16 @@ async function analyzeTextMood(text: string): Promise<Record<string, unknown>> {
 
   const raw = completion.choices[0]?.message?.content ?? "{}";
   const cleaned = raw.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```$/i, "").trim();
-  return JSON.parse(cleaned);
+  const parsed = JSON.parse(cleaned);
+  parsed._signalType = "text";
+  return parsed;
 }
 
 async function analyzeImageMood(imageBase64: string, mimeType: string): Promise<Record<string, unknown>> {
   const dataUrl = `data:${mimeType || "image/jpeg"};base64,${imageBase64}`;
 
   const response = await groq.chat.completions.create({
-    model: "meta-llama/llama-4-scout-17b-16e-instruct",
+    model: "llama-3.2-11b-vision-preview",
     max_tokens: 600,
     messages: [
       {
@@ -88,7 +90,9 @@ async function analyzeImageMood(imageBase64: string, mimeType: string): Promise<
 
   const raw = response.choices[0]?.message?.content ?? "{}";
   const cleaned = raw.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```$/i, "").trim();
-  return JSON.parse(cleaned);
+  const parsed = JSON.parse(cleaned);
+  parsed._signalType = "image";
+  return parsed;
 }
 
 async function transcribeAudio(audioBase64: string, audioMimeType: string): Promise<string> {
@@ -125,14 +129,17 @@ function fuseMoodResults(results: Record<string, unknown>[]): Record<string, unk
   const allGenres = results.flatMap(r => (r.suggested_genres as string[]) ?? []);
   const uniqueGenres = [...new Set(allGenres)].slice(0, 4);
 
+  const textSignal = results.find(r => r._signalType === "text");
+  const imageSignal = results.find(r => r._signalType === "image");
+
   return {
     ...best,
     confidence: Math.round(avgConf * 100) / 100,
     emotion_tags: uniqueTags,
     suggested_genres: uniqueGenres,
     contributing_signals: {
-      text: results[0] ? results[0].confidence : 0,
-      image: results[1] ? results[1].confidence : 0,
+      text: textSignal ? (textSignal.confidence as number) : 0,
+      image: imageSignal ? (imageSignal.confidence as number) : 0,
     },
   };
 }
@@ -150,7 +157,7 @@ router.post("/scan-poster", async (req, res) => {
     const dataUrl = `data:${mimeType || "image/jpeg"};base64,${imageBase64}`;
 
     const response = await groq.chat.completions.create({
-      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      model: "llama-3.2-11b-vision-preview",
       max_tokens: 256,
       messages: [
         {

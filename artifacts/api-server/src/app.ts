@@ -74,7 +74,8 @@ const staticDir = path.resolve(__dirname, "../../cinebook/dist/public");
 if (fs.existsSync(staticDir)) {
   app.use(express.static(staticDir));
   // SPA fallback — Express 5 requires regex instead of bare "*"
-  app.get(/(.*)/, (_req, res) => {
+  // Exclude /api and /clerk paths so that they return 404 JSON/errors properly
+  app.get(/^(?!\/(api|clerk))(.*)/, (_req, res) => {
     res.sendFile(path.join(staticDir, "index.html"));
   });
 }

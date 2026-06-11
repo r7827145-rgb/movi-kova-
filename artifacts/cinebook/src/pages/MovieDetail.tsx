@@ -23,11 +23,14 @@ export default function MovieDetail() {
   useEffect(() => {
     if (movie) {
       setMovie(movie);
+      setShowtime(null);
       if (movie.showtimes.length > 0) {
         setActiveDate(movie.showtimes[0].date);
+      } else {
+        setActiveDate("");
       }
     }
-  }, [movie, setMovie]);
+  }, [movie, setMovie, setShowtime]);
 
   if (!movie) return <div className="p-8 text-center text-white">Movie not found</div>;
 
@@ -229,7 +232,7 @@ export default function MovieDetail() {
       </main>
 
       <StickyCTA 
-        show={selectedShowtime !== null} 
+        show={selectedShowtime !== null && movie.showtimes.some(s => s.id === selectedShowtime.id)} 
         text="SELECT SEATS" 
         onClick={handleProceed} 
       />

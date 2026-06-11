@@ -1,20 +1,36 @@
 import { useBookingStore } from "../store/booking";
-import { useLocation, Link } from "wouter";
+import { useLocation, Link, useParams } from "wouter";
 import { useEffect } from "react";
 import Navbar from "../components/Navbar";
 import SeatMap from "../components/SeatMap";
 import StickyCTA from "../components/StickyCTA";
 import { ArrowLeft } from "lucide-react";
+import { getAllMovies } from "../lib/adminData";
 
 export default function SeatPicker() {
+  const { id } = useParams();
   const [, setLocation] = useLocation();
-  const { selectedMovie, selectedShowtime, selectedSeats, toggleSeat } = useBookingStore();
+  const { selectedMovie, selectedShowtime, selectedSeats, toggleSeat, setMovie, setShowtime } = useBookingStore();
 
   useEffect(() => {
-    if (!selectedMovie || !selectedShowtime) {
+    if ((!selectedMovie || !selectedShowtime) && id) {
+      const allMovies = getAllMovies();
+      const movie = allMovies.find(m => m.id === id);
+      if (movie) {
+        const queryParams = new URLSearchParams(window.location.search);
+        const showtimeId = queryParams.get("showtime");
+        if (showtimeId) {
+          const showtime = movie.showtimes.find(s => s.id === showtimeId);
+          if (showtime) {
+            setMovie(movie);
+            setShowtime(showtime);
+            return;
+          }
+        }
+      }
       setLocation("/");
     }
-  }, [selectedMovie, selectedShowtime, setLocation]);
+  }, [id, selectedMovie, selectedShowtime, setMovie, setShowtime, setLocation]);
 
   if (!selectedMovie || !selectedShowtime) return null;
 
@@ -34,7 +50,16 @@ export default function SeatPicker() {
   };
 
   const showtimePrice = selectedShowtime.price;
-  const totalPrice = selectedSeats.length * showtimePrice;
+  const totalPrice = selectedSeats.reduce((sum, seat) => {
+    const row = seat.charAt(0).toUpperCase();
+    if (row === "A" || row === "B") {
+      return sum + Math.round(showtimePrice * 0.65);
+    } else if (row === "C" || row === "D" || row === "E" || row === "F") {
+      return sum + Math.round(showtimePrice * 0.80);
+    } else {
+      return sum + showtimePrice;
+    }
+  }, 0);
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-[#0f0f0f]">

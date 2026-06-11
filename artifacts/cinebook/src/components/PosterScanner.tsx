@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Camera, Upload, X, Loader2, Ticket, AlertCircle, ScanLine, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
@@ -50,6 +50,15 @@ export default function PosterScanner({ open, onOpenChange }: PosterScannerProps
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  // Revoke object URL on change/unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (preview && preview.startsWith("blob:")) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
 
   const reset = useCallback(() => {
     setResult(null);

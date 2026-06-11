@@ -9,9 +9,10 @@ interface VideoPlayerProps {
   title: string;
   posterUrl?: string;
   onBack?: () => void;
+  onProgress?: (progress: { currentTime: number; duration: number; percent: number }) => void;
 }
 
-export default function VideoPlayer({ src, title, posterUrl, onBack }: VideoPlayerProps) {
+export default function VideoPlayer({ src, title, posterUrl, onBack, onProgress }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -135,6 +136,11 @@ export default function VideoPlayer({ src, title, posterUrl, onBack }: VideoPlay
     }
   }, [src]);
 
+  const onProgressRef = useRef(onProgress);
+  useEffect(() => {
+    onProgressRef.current = onProgress;
+  }, [onProgress]);
+
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
@@ -142,6 +148,13 @@ export default function VideoPlayer({ src, title, posterUrl, onBack }: VideoPlay
       setCurrentTime(v.currentTime);
       if (v.buffered.length > 0) {
         setBuffered(v.buffered.end(v.buffered.length - 1));
+      }
+      if (onProgressRef.current && v.duration) {
+        onProgressRef.current({
+          currentTime: v.currentTime,
+          duration: v.duration,
+          percent: (v.currentTime / v.duration) * 100
+        });
       }
     };
     const onMeta = () => { setDuration(v.duration); setLoading(false); setError(null); };

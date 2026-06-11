@@ -313,6 +313,15 @@ function CameraTab({ onResult }: { onResult: (r: MoodResult) => void }) {
   const streamRef = useRef<MediaStream | null>(null);
   const [liveMode, setLiveMode] = useState(false);
 
+  // Revoke object URL on change/unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (preview && preview.startsWith("blob:")) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
+
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
@@ -458,17 +467,20 @@ function VoiceTab({ onResult }: { onResult: (r: MoodResult) => void }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const recorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
       const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
       chunksRef.current = [];
       recorder.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data); };
       recorder.onstop = async () => {
         stream.getTracks().forEach(t => t.stop());
+        if (streamRef.current === stream) streamRef.current = null;
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
         setLoading(true);
         setError("");
@@ -500,10 +512,22 @@ function VoiceTab({ onResult }: { onResult: (r: MoodResult) => void }) {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
     recorderRef.current?.stop();
     recorderRef.current = null;
+    streamRef.current?.getTracks().forEach(t => t.stop());
+    streamRef.current = null;
     setRecording(false);
   }, []);
 
-  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (recorderRef.current && recorderRef.current.state !== "inactive") {
+        recorderRef.current.stop();
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop());
+      }
+    };
+  }, []);
 
   return (
     <div className="flex flex-col gap-4">
@@ -574,6 +598,15 @@ function HybridTab({ onResult }: { onResult: (r: MoodResult) => void }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Revoke object URL on change/unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (imagePreview && imagePreview.startsWith("blob:")) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

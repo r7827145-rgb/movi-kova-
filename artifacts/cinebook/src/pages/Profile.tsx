@@ -5,7 +5,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { RotateCcw, LogIn } from "lucide-react";
 import { useUser, useClerk } from "@clerk/react";
 import { useState } from "react";
-import { getAllMovies } from "../lib/adminData";
+import { getAllMovies, getBookings } from "../lib/adminData";
 import { 
   getSubscription, 
   cancelSubscription, 
@@ -22,8 +22,20 @@ export default function Profile() {
   const { signOut } = useClerk();
   const [activeTab, setActiveTab] = useState<"upcoming" | "history" | "subscription" | "payments" | "preferences">("upcoming");
   const allMovies = getAllMovies();
-  const movie = allMovies[0] || { title: "", posterUrl: "", id: "" };
-  const pastMovie = allMovies[1] || { title: "", posterUrl: "", id: "" };
+  const allBookings = getBookings();
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const upcomingBookings = allBookings.filter(b => {
+    if (b.status !== "CONFIRMED") return false;
+    const datePart = b.showtime.split(" ")[0];
+    return datePart >= todayStr;
+  });
+
+  const pastBookings = allBookings.filter(b => {
+    if (b.status === "USED" || b.status === "CANCELLED") return true;
+    const datePart = b.showtime.split(" ")[0];
+    return datePart < todayStr;
+  });
 
   const initials = user
     ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() ||
@@ -69,13 +81,7 @@ export default function Profile() {
     );
   }
 
-  const demoQrData = JSON.stringify({
-    ref: "CB-DEMO9234",
-    movie: movie.title,
-    showtime: "Tomorrow 14:30",
-    seats: "F4, F5",
-    format: "IMAX",
-  });
+  const hasUpcoming = upcomingBookings.length > 0;
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-[#0f0f0f] text-white">
@@ -117,7 +123,7 @@ export default function Profile() {
 
             <div className="flex gap-8 justify-center md:justify-start text-sm">
               <div>
-                <div className="font-bold text-xl text-white">3</div>
+                <div className="font-bold text-xl text-white">{allBookings.length}</div>
                 <div className="text-gray-500 uppercase tracking-wider text-[10px]">Booked</div>
               </div>
               <div>
@@ -161,38 +167,56 @@ export default function Profile() {
             <div className="md:col-span-2 space-y-5">
               <h2 className="font-display font-bold text-lg text-white">Upcoming Tickets</h2>
 
-              <div className="glass-card rounded-xl overflow-hidden flex flex-col sm:flex-row hover:border-[#1e88e5]/30 transition-colors group">
-                <img src={movie.posterUrl} alt="Poster" className="w-full sm:w-36 h-48 sm:h-auto object-cover" />
-                <div className="p-5 flex-1 flex flex-col">
-                  <h3 className="font-display font-bold text-xl leading-tight text-white mb-1">{movie.title}</h3>
-                  <p className="text-sm text-[#42a5f5] font-medium mb-3">Tomorrow • 14:30 • IMAX</p>
-                  <div className="flex gap-5 mb-4 text-sm text-gray-300">
-                    <div>
-                      <span className="block text-gray-500 text-[10px] uppercase tracking-wider mb-0.5">Hall</span>
-                      <span className="font-semibold">SCREEN 1</span>
-                    </div>
-                    <div>
-                      <span className="block text-gray-500 text-[10px] uppercase tracking-wider mb-0.5">Seats</span>
-                      <span className="font-semibold">F4, F5</span>
-                    </div>
-                    <div>
-                      <span className="block text-gray-500 text-[10px] uppercase tracking-wider mb-0.5">Paid</span>
-                      <span className="font-semibold text-[#ffc107]">₹1,000</span>
-                    </div>
-                  </div>
-                  <div className="mt-auto">
-                    <span className="text-xs text-[#ffc107] bg-[#ffc107]/10 px-2 py-1 rounded font-semibold uppercase tracking-wider">
-                      Pay at Counter
-                    </span>
-                  </div>
+              {!hasUpcoming ? (
+                <div className="glass-card rounded-xl p-8 text-center text-gray-500 text-sm border border-white/5">
+                  No upcoming bookings. Go to home page to book a showtime.
                 </div>
-                <div className="hidden sm:flex flex-col items-center justify-center p-5 border-l border-white/5 bg-white/[0.02]">
-                  <div className="bg-white p-2.5 rounded-lg mb-2">
-                    <QRCodeSVG value={demoQrData} size={80} level="M" />
-                  </div>
-                  <span className="text-[9px] text-gray-500 uppercase tracking-widest">#CB-DEMO9234</span>
-                </div>
-              </div>
+              ) : (
+                upcomingBookings.map((b) => {
+                  const matchMovie = allMovies.find(m => m.id === b.movieId);
+                  const qrData = JSON.stringify({
+                    ref: b.ref,
+                    movie: b.movie,
+                    showtime: b.showtime,
+                    seats: b.seats.join(", "),
+                    format: b.format,
+                  });
+                  return (
+                    <div key={b.ref} className="glass-card rounded-xl overflow-hidden flex flex-col sm:flex-row hover:border-[#1e88e5]/30 transition-colors group">
+                      <img src={matchMovie?.posterUrl || "https://images.unsplash.com/photo-1440404653325-ab127d49abc1"} alt="Poster" className="w-full sm:w-36 h-48 sm:h-auto object-cover" />
+                      <div className="p-5 flex-1 flex flex-col">
+                        <h3 className="font-display font-bold text-xl leading-tight text-white mb-1">{b.movie}</h3>
+                        <p className="text-sm text-[#42a5f5] font-medium mb-3">{b.showtime} • {b.format}</p>
+                        <div className="flex gap-5 mb-4 text-sm text-gray-300">
+                          <div>
+                            <span className="block text-gray-500 text-[10px] uppercase tracking-wider mb-0.5">Hall</span>
+                            <span className="font-semibold">{b.hall}</span>
+                          </div>
+                          <div>
+                            <span className="block text-gray-500 text-[10px] uppercase tracking-wider mb-0.5">Seats</span>
+                            <span className="font-semibold">{b.seats.join(", ")}</span>
+                          </div>
+                          <div>
+                            <span className="block text-gray-500 text-[10px] uppercase tracking-wider mb-0.5">Paid</span>
+                            <span className="font-semibold text-[#ffc107]">₹{b.total}</span>
+                          </div>
+                        </div>
+                        <div className="mt-auto">
+                          <span className="text-xs text-[#ffc107] bg-[#ffc107]/10 px-2 py-1 rounded font-semibold uppercase tracking-wider">
+                            Pay at Counter
+                          </span>
+                        </div>
+                      </div>
+                      <div className="hidden sm:flex flex-col items-center justify-center p-5 border-l border-white/5 bg-white/[0.02]">
+                        <div className="bg-white p-2.5 rounded-lg mb-2">
+                          <QRCodeSVG value={qrData} size={80} level="M" />
+                        </div>
+                        <span className="text-[9px] text-gray-500 uppercase tracking-widest">#{b.ref}</span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
 
             <div>
@@ -250,19 +274,38 @@ export default function Profile() {
 
             <div>
               <h2 className="font-display font-bold text-lg text-white mb-4">Past Theater Bookings</h2>
-              <div className="glass-card rounded-xl p-4 flex gap-4 opacity-75">
-                <img src={pastMovie.posterUrl} alt="Poster" className="w-14 h-20 object-cover rounded-md grayscale" />
-                <div className="flex-1 flex flex-col justify-center">
-                  <h3 className="font-bold text-white text-base">{pastMovie.title}</h3>
-                  <p className="text-xs text-gray-400 mt-1">March 12, 2026 • Standard</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Seats: C3, C4 • ₹760</p>
-                  <Link href={`/movies/${pastMovie.id}`}>
-                    <button className="text-xs text-[#1e88e5] font-semibold uppercase tracking-wider mt-2 flex items-center gap-1 hover:text-white transition-colors w-max">
-                      <RotateCcw className="w-3 h-3" /> Book Again
-                    </button>
-                  </Link>
+              {pastBookings.length === 0 ? (
+                <p className="text-sm text-gray-500 bg-white/[0.02] border border-white/5 rounded-xl p-4 text-center">No past bookings found.</p>
+              ) : (
+                <div className="space-y-4">
+                  {pastBookings.map((pb, idx) => {
+                    const matchMovie = allMovies.find(m => m.id === pb.movieId);
+                    return (
+                      <div key={idx} className="glass-card rounded-xl p-4 flex gap-4 opacity-75">
+                        <img 
+                          src={matchMovie?.posterUrl || "https://images.unsplash.com/photo-1440404653325-ab127d49abc1"} 
+                          alt="Poster" 
+                          className="w-14 h-20 object-cover rounded-md grayscale flex-shrink-0" 
+                        />
+                        <div className="flex-1 flex flex-col justify-center">
+                          <h3 className="font-bold text-white text-base leading-tight">{pb.movie}</h3>
+                          <p className="text-xs text-gray-400 mt-1">{pb.showtime} • {pb.format}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">Seats: {pb.seats.join(", ")} • ₹{pb.total}</p>
+                          {pb.status === "CANCELLED" ? (
+                            <span className="text-[10px] text-red-400 font-bold uppercase tracking-wider mt-2 bg-red-500/10 px-2 py-0.5 rounded w-max">Cancelled</span>
+                          ) : (
+                            <Link href={`/movies/${pb.movieId}`}>
+                              <button className="text-xs text-[#1e88e5] font-semibold uppercase tracking-wider mt-2 flex items-center gap-1 hover:text-white transition-colors w-max">
+                                <RotateCcw className="w-3 h-3" /> Book Again
+                              </button>
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              </div>
+              )}
             </div>
           </div>
         )}

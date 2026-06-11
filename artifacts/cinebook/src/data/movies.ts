@@ -36,6 +36,7 @@ export interface Movie {
   streamUrl?: string;
   isStreamable?: boolean;
   isPremium?: boolean;
+  theaterId?: string;
 }
 
 const today = new Date().toISOString().split('T')[0];
@@ -62,10 +63,10 @@ export const movies: Movie[] = [
     trailerYoutubeId: "U2Qp5pL3ovA",
     score: 94,
     showtimes: [
-      { id: "s1", time: "14:30", date: today, format: "IMAX", price: 24, hallName: "SCREEN 1" },
-      { id: "s2", time: "18:00", date: today, format: "Standard", price: 18, hallName: "SCREEN 4" },
-      { id: "s3", time: "21:15", date: today, format: "IMAX", price: 24, hallName: "SCREEN 1" },
-      { id: "s4", time: "15:00", date: tomorrow, format: "IMAX", price: 24, hallName: "SCREEN 1" }
+      { id: "s1", time: "14:30", date: today, format: "IMAX", price: 350, hallName: "SCREEN 1" },
+      { id: "s2", time: "18:00", date: today, format: "Standard", price: 250, hallName: "SCREEN 4" },
+      { id: "s3", time: "21:15", date: today, format: "IMAX", price: 350, hallName: "SCREEN 1" },
+      { id: "s4", time: "15:00", date: tomorrow, format: "IMAX", price: 350, hallName: "SCREEN 1" }
     ],
     isNowShowing: true,
     isComingSoon: false,
@@ -93,9 +94,9 @@ export const movies: Movie[] = [
     trailerYoutubeId: "NOhDyUmT9z0",
     score: 88,
     showtimes: [
-      { id: "s5", time: "16:00", date: today, format: "4DX", price: 26, hallName: "SCREEN 2" },
-      { id: "s6", time: "20:30", date: today, format: "Standard", price: 18, hallName: "SCREEN 5" },
-      { id: "s7", time: "19:00", date: tomorrow, format: "4DX", price: 26, hallName: "SCREEN 2" }
+      { id: "s5", time: "16:00", date: today, format: "4DX", price: 400, hallName: "SCREEN 2" },
+      { id: "s6", time: "20:30", date: today, format: "Standard", price: 250, hallName: "SCREEN 5" },
+      { id: "s7", time: "19:00", date: tomorrow, format: "4DX", price: 400, hallName: "SCREEN 2" }
     ],
     isNowShowing: true,
     isComingSoon: false,
@@ -122,8 +123,8 @@ export const movies: Movie[] = [
     trailerYoutubeId: "dQw4w9WgXcQ",
     score: 82,
     showtimes: [
-      { id: "s8", time: "17:15", date: today, format: "Standard", price: 16, hallName: "SCREEN 3" },
-      { id: "s9", time: "22:00", date: today, format: "Standard", price: 16, hallName: "SCREEN 3" }
+      { id: "s8", time: "17:15", date: today, format: "Standard", price: 200, hallName: "SCREEN 3" },
+      { id: "s9", time: "22:00", date: today, format: "Standard", price: 200, hallName: "SCREEN 3" }
     ],
     isNowShowing: true,
     isComingSoon: false,
@@ -150,8 +151,8 @@ export const movies: Movie[] = [
     trailerYoutubeId: "dQw4w9WgXcQ",
     score: 89,
     showtimes: [
-      { id: "s10", time: "21:45", date: today, format: "Standard", price: 16, hallName: "SCREEN 6" },
-      { id: "s11", time: "23:30", date: today, format: "Standard", price: 16, hallName: "SCREEN 6" }
+      { id: "s10", time: "21:45", date: today, format: "Standard", price: 200, hallName: "SCREEN 6" },
+      { id: "s11", time: "23:30", date: today, format: "Standard", price: 200, hallName: "SCREEN 6" }
     ],
     isNowShowing: true,
     isComingSoon: false,
@@ -178,8 +179,8 @@ export const movies: Movie[] = [
     trailerYoutubeId: "dQw4w9WgXcQ",
     score: 91,
     showtimes: [
-      { id: "s12", time: "13:00", date: tomorrow, format: "Standard", price: 14, hallName: "SCREEN 7" },
-      { id: "s13", time: "15:45", date: tomorrow, format: "Standard", price: 14, hallName: "SCREEN 7" }
+      { id: "s12", time: "13:00", date: tomorrow, format: "Standard", price: 180, hallName: "SCREEN 7" },
+      { id: "s13", time: "15:45", date: tomorrow, format: "Standard", price: 180, hallName: "SCREEN 7" }
     ],
     isNowShowing: false,
     isComingSoon: true,
@@ -205,8 +206,8 @@ export const movies: Movie[] = [
     trailerYoutubeId: "dQw4w9WgXcQ",
     score: 78,
     showtimes: [
-      { id: "s14", time: "19:30", date: tomorrow, format: "IMAX", price: 24, hallName: "SCREEN 1" },
-      { id: "s15", time: "22:15", date: tomorrow, format: "Standard", price: 18, hallName: "SCREEN 4" }
+      { id: "s14", time: "19:30", date: tomorrow, format: "IMAX", price: 350, hallName: "SCREEN 1" },
+      { id: "s15", time: "22:15", date: tomorrow, format: "Standard", price: 250, hallName: "SCREEN 4" }
     ],
     isNowShowing: false,
     isComingSoon: true,

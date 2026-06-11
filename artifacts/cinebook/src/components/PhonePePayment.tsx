@@ -179,7 +179,15 @@ export default function PhonePePayment({ amount, description, onSuccess, onClose
                       <input
                         type="text"
                         value={cardExpiry}
-                        onChange={(e) => setCardExpiry(e.target.value.slice(0, 5))}
+                        onChange={(e) => {
+                          let val = e.target.value.replace(/\D/g, "");
+                          if (val.length > 2) {
+                            val = val.slice(0, 2) + "/" + val.slice(2, 4);
+                          } else {
+                            val = val.slice(0, 2);
+                          }
+                          setCardExpiry(val);
+                        }}
                         placeholder="MM/YY"
                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#6739B7] font-mono"
                       />

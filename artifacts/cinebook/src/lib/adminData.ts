@@ -42,6 +42,7 @@ export interface CustomMovie {
   streamUrl?: string;
   isStreamable?: boolean;
   isPremium?: boolean;
+  theaterId?: string;
 }
 
 export interface MovieRequest {
@@ -159,6 +160,7 @@ export const approveMovieRequest = (id: string): void => {
     director: r.director, posterUrl: r.posterUrl, backdropUrl: r.backdropUrl,
     isNowShowing: r.isNowShowing, isComingSoon: r.isComingSoon, isCustom: true,
     streamUrl: r.streamUrl, isStreamable: r.isStreamable, isPremium: r.isPremium,
+    theaterId: r.theaterId,
   });
 };
 
@@ -234,6 +236,7 @@ export const getAllMovies = (): Movie[] => {
     streamUrl: m.streamUrl,
     isStreamable: m.isStreamable,
     isPremium: m.isPremium,
+    theaterId: m.theaterId,
   }));
   return [...seedMovies, ...mappedCustom];
 };
