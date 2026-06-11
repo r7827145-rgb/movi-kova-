@@ -69,7 +69,7 @@ export const movies: Movie[] = [
     ],
     isNowShowing: true,
     isComingSoon: false,
-    streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+    streamUrl: "https://media.w3.org/2010/05/sintel/trailer_hd.mp4",
     isStreamable: true,
     isPremium: true
   },
@@ -99,7 +99,7 @@ export const movies: Movie[] = [
     ],
     isNowShowing: true,
     isComingSoon: false,
-    streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    streamUrl: "https://media.w3.org/2010/05/bunny/trailer.mp4",
     isStreamable: true,
     isPremium: false
   },
@@ -127,7 +127,7 @@ export const movies: Movie[] = [
     ],
     isNowShowing: true,
     isComingSoon: false,
-    streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    streamUrl: "https://vjs.zencdn.net/v/oceans.mp4",
     isStreamable: true,
     isPremium: true
   },
@@ -155,7 +155,7 @@ export const movies: Movie[] = [
     ],
     isNowShowing: true,
     isComingSoon: false,
-    streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    streamUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
     isStreamable: true,
     isPremium: true
   },
