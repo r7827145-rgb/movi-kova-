@@ -69,7 +69,7 @@ export const movies: Movie[] = [
     ],
     isNowShowing: true,
     isComingSoon: false,
-    streamUrl: "https://media.w3.org/2010/05/sintel/trailer_hd.mp4",
+    streamUrl: "https://vjs.zencdn.net/v/oceans.mp4",
     isStreamable: true,
     isPremium: true
   },
@@ -99,7 +99,7 @@ export const movies: Movie[] = [
     ],
     isNowShowing: true,
     isComingSoon: false,
-    streamUrl: "https://media.w3.org/2010/05/bunny/trailer.mp4",
+    streamUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
     isStreamable: true,
     isPremium: false
   },
@@ -127,7 +127,7 @@ export const movies: Movie[] = [
     ],
     isNowShowing: true,
     isComingSoon: false,
-    streamUrl: "https://vjs.zencdn.net/v/oceans.mp4",
+    streamUrl: "https://www.w3schools.com/html/movie.mp4",
     isStreamable: true,
     isPremium: true
   },
@@ -155,7 +155,7 @@ export const movies: Movie[] = [
     ],
     isNowShowing: true,
     isComingSoon: false,
-    streamUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+    streamUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
     isStreamable: true,
     isPremium: true
   },

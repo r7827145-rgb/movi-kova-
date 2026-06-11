@@ -84,7 +84,7 @@ export default function WatchMovie({ params }: { params: { id: string } }) {
         <div className="w-full aspect-video max-w-4xl bg-black rounded-2xl overflow-hidden border border-white/5 shadow-2xl relative">
           {hasAccess ? (
             <VideoPlayer 
-              src={movie.streamUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"} 
+              src={(!movie.streamUrl || movie.streamUrl.includes("googleapis.com")) ? "https://vjs.zencdn.net/v/oceans.mp4" : movie.streamUrl} 
               title={movie.title}
             />
           ) : (

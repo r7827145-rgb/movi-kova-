@@ -136,7 +136,7 @@ function MovieEditorModal({ onSave, onClose, initial }: {
           <div>
             <label className="text-[11px] text-gray-400 uppercase tracking-wider mb-1 block">Stream Video URL (MP4 / HLS)</label>
             <input type="text" value={form.streamUrl || ""}
-              placeholder="e.g. https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+              placeholder="e.g. https://vjs.zencdn.net/v/oceans.mp4"
               onChange={e => set("streamUrl", e.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#f84464]"
             />

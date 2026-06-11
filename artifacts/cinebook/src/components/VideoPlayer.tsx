@@ -15,7 +15,7 @@ export default function VideoPlayer({ src, title, posterUrl, onBack }: VideoPlay
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
-  const hideTimer = useRef<ReturnType<typeof setTimeout>>();
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -119,6 +119,20 @@ export default function VideoPlayer({ src, title, posterUrl, onBack }: VideoPlay
       setLoading(true);
       setError(null);
     }
+
+    if (src && (src.startsWith("http://") || src.startsWith("https://"))) {
+      fetch(src, { method: "HEAD" })
+        .then((res) => {
+          if (res.status === 404) {
+            setError("Error 404: The video file was not found. Please verify the stream URL.");
+          } else if (res.status === 403) {
+            setError("Error 403: Access to this video file is forbidden (Access Denied).");
+          }
+        })
+        .catch((err) => {
+          console.warn("CORS or Network issue checking URL, letting video player load it directly", err);
+        });
+    }
   }, [src]);
 
   useEffect(() => {
@@ -136,7 +150,12 @@ export default function VideoPlayer({ src, title, posterUrl, onBack }: VideoPlay
     const onEnded = () => setPlaying(false);
     const onError = () => {
       setLoading(false);
-      setError("Failed to load video. The resource may be unavailable or blocked by CORS.");
+      const mediaError = v.error;
+      let msg = "Failed to load video. The resource may be unavailable or blocked by CORS.";
+      if (mediaError && mediaError.code === 4) {
+        msg = "Error: Video format not supported or resource not found (404/403).";
+      }
+      setError(msg);
     };
     const onStalled = () => {
       // Don't show critical error on stalled, just let it load or buffer
