@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Play, Pause, Volume2, VolumeX, Maximize, Minimize,
-  SkipBack, SkipForward, Settings, PictureInPicture2,
+  SkipBack, SkipForward, Settings, PictureInPicture2, AlertCircle,
 } from "lucide-react";
 
 interface VideoPlayerProps {
@@ -27,6 +27,7 @@ export default function VideoPlayer({ src, title, posterUrl, onBack }: VideoPlay
   const [showControls, setShowControls] = useState(true);
   const [loading, setLoading] = useState(true);
   const [showVolume, setShowVolume] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const formatTime = (s: number) => {
     const m = Math.floor(s / 60);
@@ -36,10 +37,15 @@ export default function VideoPlayer({ src, title, posterUrl, onBack }: VideoPlay
 
   const togglePlay = useCallback(() => {
     const v = videoRef.current;
-    if (!v) return;
-    if (v.paused) { v.play(); setPlaying(true); }
+    if (!v || error) return;
+    if (v.paused) { 
+      v.play().then(() => setPlaying(true)).catch(() => {
+        setError("Autoplay blocked or playback failed. Click play to try again.");
+        setPlaying(false);
+      }); 
+    }
     else { v.pause(); setPlaying(false); }
-  }, []);
+  }, [error]);
 
   const toggleMute = useCallback(() => {
     const v = videoRef.current;
@@ -104,6 +110,17 @@ export default function VideoPlayer({ src, title, posterUrl, onBack }: VideoPlay
     }
   }, [playing]);
 
+  // Reset and load player whenever src changes
+  useEffect(() => {
+    const v = videoRef.current;
+    if (v) {
+      v.load();
+      setPlaying(false);
+      setLoading(true);
+      setError(null);
+    }
+  }, [src]);
+
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
@@ -113,21 +130,34 @@ export default function VideoPlayer({ src, title, posterUrl, onBack }: VideoPlay
         setBuffered(v.buffered.end(v.buffered.length - 1));
       }
     };
-    const onMeta = () => { setDuration(v.duration); setLoading(false); };
+    const onMeta = () => { setDuration(v.duration); setLoading(false); setError(null); };
     const onWaiting = () => setLoading(true);
-    const onPlaying = () => setLoading(false);
+    const onPlaying = () => { setLoading(false); setError(null); };
     const onEnded = () => setPlaying(false);
+    const onError = () => {
+      setLoading(false);
+      setError("Failed to load video. The resource may be unavailable or blocked by CORS.");
+    };
+    const onStalled = () => {
+      // Don't show critical error on stalled, just let it load or buffer
+      console.warn("Video playback stalled...");
+    };
+
     v.addEventListener("timeupdate", onTime);
     v.addEventListener("loadedmetadata", onMeta);
     v.addEventListener("waiting", onWaiting);
     v.addEventListener("playing", onPlaying);
     v.addEventListener("ended", onEnded);
+    v.addEventListener("error", onError);
+    v.addEventListener("stalled", onStalled);
     return () => {
       v.removeEventListener("timeupdate", onTime);
       v.removeEventListener("loadedmetadata", onMeta);
       v.removeEventListener("waiting", onWaiting);
       v.removeEventListener("playing", onPlaying);
       v.removeEventListener("ended", onEnded);
+      v.removeEventListener("error", onError);
+      v.removeEventListener("stalled", onStalled);
     };
   }, []);
 
@@ -172,14 +202,34 @@ export default function VideoPlayer({ src, title, posterUrl, onBack }: VideoPlay
       />
 
       {/* Loading Spinner */}
-      {loading && (
+      {loading && !error && (
         <div className="absolute inset-0 flex items-center justify-center z-20">
           <div className="w-12 h-12 border-3 border-white/30 border-t-white rounded-full animate-spin" />
         </div>
       )}
 
+      {/* Error Panel */}
+      {error && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 p-6 text-center z-20">
+          <AlertCircle className="w-12 h-12 text-[#e50914] mb-3 animate-pulse" />
+          <p className="text-white text-sm font-semibold mb-4">{error}</p>
+          <button
+            onClick={() => {
+              if (videoRef.current) {
+                setError(null);
+                setLoading(true);
+                videoRef.current.load();
+              }
+            }}
+            className="px-5 py-2.5 bg-[#e50914] hover:bg-[#e50914]/90 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-red-600/20"
+          >
+            Retry Playback
+          </button>
+        </div>
+      )}
+
       {/* Big Play Button (when paused) */}
-      {!playing && !loading && (
+      {!playing && !loading && !error && (
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <div className="w-20 h-20 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/20 hover:bg-white/25 transition-all hover:scale-110">
             <Play className="w-8 h-8 text-white ml-1" fill="white" />
