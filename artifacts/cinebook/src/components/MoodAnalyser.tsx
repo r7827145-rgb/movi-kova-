@@ -1,10 +1,11 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X, Loader2, Mic, MicOff, Camera, Type, Layers, Ticket,
+  X, Loader2, Mic, MicOff, Camera, Type, Layers, Ticket, Play,
   AlertCircle, ShieldCheck, RotateCcw, Brain,
 } from "lucide-react";
 import { useLocation } from "wouter";
+import { getAllMovies } from "../lib/adminData";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -136,36 +137,63 @@ function MoodBadge({ mood, confidence }: { mood: string; confidence: number }) {
 
 function MovieSuggestions({ movies }: { movies: SuggestedMovie[] }) {
   const [, setLocation] = useLocation();
+  const allMovies = getAllMovies();
+
   return (
     <div className="flex flex-col gap-2.5">
       <p className="text-xs uppercase tracking-widest font-semibold text-gray-400">Suggested for You</p>
-      {movies.map((movie, i) => (
-        <motion.div
-          key={movie.title}
-          initial={{ opacity: 0, x: -12 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: i * 0.08 }}
-          className="flex items-start gap-3 p-3 rounded-xl bg-[#16213e] border border-white/[0.07] hover:border-[#1e88e5]/30 transition-colors group"
-        >
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1565c0]/30 to-[#1e88e5]/30 flex items-center justify-center flex-shrink-0 mt-0.5 font-bold text-[#42a5f5] text-xs border border-[#1e88e5]/20">
-            {movie.score}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-white font-semibold text-sm leading-snug">{movie.title}</p>
-            <p className="text-gray-400 text-[11px] leading-relaxed mt-0.5">{movie.reason}</p>
-          </div>
-          {movie.id && (
-            <button
-              onClick={() => setLocation(`/movies/${movie.id}`)}
-              className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-white transition-all opacity-0 group-hover:opacity-100"
-              style={{ background: "linear-gradient(135deg, #1565c0, #1e88e5)" }}
-            >
-              <Ticket className="w-3 h-3" />
-              Book
-            </button>
-          )}
-        </motion.div>
-      ))}
+      {movies.map((movie, i) => {
+        const foundMovie = allMovies.find(m => m.id === movie.id || m.title.toLowerCase() === movie.title.toLowerCase());
+        const isStream = foundMovie?.isStreamable;
+        const isPrem = foundMovie?.isPremium;
+
+        return (
+          <motion.div
+            key={movie.title}
+            initial={{ opacity: 0, x: -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.08 }}
+            className="flex items-start gap-3 p-3 rounded-xl bg-[#16213e] border border-white/[0.07] hover:border-[#1e88e5]/30 transition-colors group"
+          >
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1565c0]/30 to-[#1e88e5]/30 flex items-center justify-center flex-shrink-0 mt-0.5 font-bold text-[#42a5f5] text-xs border border-[#1e88e5]/20">
+              {movie.score}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <p className="text-white font-semibold text-sm leading-snug">{movie.title}</p>
+                {isStream && (
+                  <span className={`text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded-sm ${
+                    isPrem ? "bg-amber-500 text-black" : "bg-purple-600 text-white"
+                  }`}>
+                    {isPrem ? "VIP STREAM" : "STREAM FREE"}
+                  </span>
+                )}
+              </div>
+              <p className="text-gray-400 text-[11px] leading-relaxed mt-0.5">{movie.reason}</p>
+            </div>
+            <div className="flex gap-1.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+              {isStream && foundMovie && (
+                <button
+                  onClick={() => setLocation(`/watch/${foundMovie.id}`)}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-white transition-all bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500"
+                >
+                  <Play className="w-3 h-3 fill-current" />
+                  Watch
+                </button>
+              )}
+              {movie.id && foundMovie?.isNowShowing && (
+                <button
+                  onClick={() => setLocation(`/movies/${foundMovie.id}`)}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-white transition-all bg-gradient-to-r from-[#1565c0] to-[#1e88e5]"
+                >
+                  <Ticket className="w-3 h-3" />
+                  Book
+                </button>
+              )}
+            </div>
+          </motion.div>
+        );
+      })}
     </div>
   );
 }

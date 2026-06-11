@@ -94,6 +94,7 @@ function MovieEditorModal({ onSave, onClose, initial }: {
   const [form, setForm] = useState<Partial<CustomMovie>>(initial || {
     title: "", synopsis: "", genre: [], rating: "UA", year: 2026, duration: 120, score: 80,
     director: "", posterUrl: "", backdropUrl: "", isNowShowing: true, isComingSoon: false,
+    isStreamable: false, isPremium: false, streamUrl: "",
   });
   const set = (k: keyof CustomMovie, v: unknown) => setForm(f => ({ ...f, [k]: v }));
 
@@ -105,6 +106,9 @@ function MovieEditorModal({ onSave, onClose, initial }: {
       id: initial?.id || `cm_${Date.now()}`,
       genre: typeof form.genre === "string" ? (form.genre as string).split(",").map(g => g.trim().toUpperCase()) : form.genre || [],
       isCustom: true,
+      isStreamable: !!form.isStreamable,
+      isPremium: !!form.isPremium,
+      streamUrl: form.streamUrl || "",
     } as CustomMovie);
   };
 
@@ -128,6 +132,16 @@ function MovieEditorModal({ onSave, onClose, initial }: {
               />
             </div>
           ))}
+          
+          <div>
+            <label className="text-[11px] text-gray-400 uppercase tracking-wider mb-1 block">Stream Video URL (MP4 / HLS)</label>
+            <input type="text" value={form.streamUrl || ""}
+              placeholder="e.g. https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+              onChange={e => set("streamUrl", e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#f84464]"
+            />
+          </div>
+
           <div className="grid grid-cols-3 gap-3">
             {([["Year", "year"], ["Duration (min)", "duration"], ["Score (0-100)", "score"]] as [string, keyof CustomMovie][]).map(([label, key]) => (
               <div key={key}>
@@ -139,8 +153,8 @@ function MovieEditorModal({ onSave, onClose, initial }: {
               </div>
             ))}
           </div>
-          <div className="flex gap-4">
-            {[["Now Showing", "isNowShowing"], ["Coming Soon", "isComingSoon"]].map(([label, key]) => (
+          <div className="flex flex-wrap gap-4 pt-1">
+            {[["Now Showing", "isNowShowing"], ["Coming Soon", "isComingSoon"], ["Streamable", "isStreamable"], ["Premium (Sub Only)", "isPremium"]].map(([label, key]) => (
               <label key={key} className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
                 <input type="checkbox" checked={!!form[key as keyof CustomMovie]}
                   onChange={e => set(key as keyof CustomMovie, e.target.checked)}

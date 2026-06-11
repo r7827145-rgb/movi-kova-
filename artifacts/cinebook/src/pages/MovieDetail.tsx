@@ -1,5 +1,6 @@
 import { useParams, useLocation } from "wouter";
-import { movies, Showtime } from "../data/movies";
+import { Showtime } from "../data/movies";
+import { getAllMovies } from "../lib/adminData";
 import { useBookingStore } from "../store/booking";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -12,7 +13,7 @@ import { clsx } from "clsx";
 export default function MovieDetail() {
   const { id } = useParams();
   const [, setLocation] = useLocation();
-  const movie = movies.find(m => m.id === id);
+  const movie = getAllMovies().find(m => m.id === id);
   const setMovie = useBookingStore(state => state.setMovie);
   const selectedShowtime = useBookingStore(state => state.selectedShowtime);
   const setShowtime = useBookingStore(state => state.setShowtime);
@@ -88,13 +89,27 @@ export default function MovieDetail() {
                 </div>
 
                 {/* CTA */}
-                {movie.isNowShowing ? (
-                  <button className="btn-hs-primary px-8 py-3 w-full sm:w-auto justify-center" onClick={() => document.getElementById('showtimes-section')?.scrollIntoView({ behavior: 'smooth' })}>
-                    Book tickets
-                  </button>
-                ) : (
-                  <button className="px-8 py-3 rounded border border-white/20 text-gray-300 font-semibold w-full sm:w-auto" disabled>Coming Soon</button>
-                )}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {movie.isNowShowing ? (
+                    <button className="btn-hs-primary px-8 py-3 w-full sm:w-auto justify-center" onClick={() => document.getElementById('showtimes-section')?.scrollIntoView({ behavior: 'smooth' })}>
+                      Book tickets
+                    </button>
+                  ) : (
+                    <button className="px-8 py-3 rounded border border-white/20 text-gray-300 font-semibold w-full sm:w-auto" disabled>Coming Soon</button>
+                  )}
+
+                  {movie.isStreamable && (
+                    <button 
+                      className="px-8 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-600/20"
+                      onClick={() => setLocation(`/watch/${movie.id}`)}
+                    >
+                      <span>Watch Now</span>
+                      {movie.isPremium && (
+                        <span className="text-[10px] bg-amber-500 text-black px-1.5 py-0.5 rounded font-extrabold tracking-wide uppercase">VIP</span>
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>

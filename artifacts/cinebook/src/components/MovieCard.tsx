@@ -28,9 +28,21 @@ export default function MovieCard({ movie, showPrice = true, variant = "portrait
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             loading="lazy"
           />
+          {movie.isStreamable && (
+            <span className={clsx(
+              "absolute top-2 left-2 text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded tracking-wider shadow-md z-10",
+              movie.isPremium 
+                ? "bg-amber-500 text-black font-extrabold" 
+                : "bg-purple-600 text-white"
+            )}>
+              {movie.isPremium ? "VIP Stream" : "Stream Free"}
+            </span>
+          )}
           {/* Red overlay on hover with BOOK NOW */}
           <div className="absolute inset-0 bg-[#f84464]/80 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-            <span className="text-white font-bold text-sm tracking-widest uppercase drop-shadow-md">Book Tickets</span>
+            <span className="text-white font-bold text-sm tracking-widest uppercase drop-shadow-md">
+              {movie.isStreamable && !movie.isNowShowing ? "Watch Now" : "Book Tickets"}
+            </span>
           </div>
         </div>
         

@@ -3,18 +3,27 @@ import Footer from "../components/Footer";
 import { Link } from "wouter";
 import { QRCodeSVG } from "qrcode.react";
 import { RotateCcw, LogIn } from "lucide-react";
-import { movies } from "../data/movies";
 import { useUser, useClerk } from "@clerk/react";
 import { useState } from "react";
+import { getAllMovies } from "../lib/adminData";
+import { 
+  getSubscription, 
+  cancelSubscription, 
+  toggleAutoRenew, 
+  getPaymentHistory, 
+  getWatchHistory,
+  isSubscribed
+} from "../lib/subscriptionData";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 export default function Profile() {
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
-  const [activeTab, setActiveTab] = useState<"upcoming" | "history" | "preferences">("upcoming");
-  const movie = movies[0];
-  const pastMovie = movies[1];
+  const [activeTab, setActiveTab] = useState<"upcoming" | "history" | "subscription" | "payments" | "preferences">("upcoming");
+  const allMovies = getAllMovies();
+  const movie = allMovies[0] || { title: "", posterUrl: "", id: "" };
+  const pastMovie = allMovies[1] || { title: "", posterUrl: "", id: "" };
 
   const initials = user
     ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() ||
@@ -94,9 +103,15 @@ export default function Profile() {
             <h1 className="font-display font-bold text-2xl md:text-3xl tracking-tight mb-1">{displayName}</h1>
             <p className="text-gray-400 text-sm mb-3">{user.emailAddresses[0]?.emailAddress}</p>
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-5">
-              <span className="bg-gradient-to-r from-[#1565c0] to-[#1e88e5] text-white text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full">
-                PREMIUM MEMBER
-              </span>
+              {isSubscribed() ? (
+                <span className="bg-gradient-to-r from-[#d4af37] to-[#f39c12] text-black text-[10px] font-extrabold tracking-widest uppercase px-3 py-1 rounded-full shadow-[0_0_15px_rgba(243,156,18,0.4)] flex items-center gap-1">
+                  ⭐ VIP STREAMER
+                </span>
+              ) : (
+                <span className="bg-gradient-to-r from-[#1565c0] to-[#1e88e5] text-white text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full">
+                  STANDARD MEMBER
+                </span>
+              )}
               <span className="text-xs text-gray-500">Member since {memberSince}</span>
             </div>
 
@@ -125,18 +140,18 @@ export default function Profile() {
         </div>
 
         {/* Tab Bar */}
-        <div className="flex gap-6 border-b border-white/10 mb-7">
-          {(["upcoming", "history", "preferences"] as const).map(tab => (
+        <div className="flex gap-6 border-b border-white/10 mb-7 overflow-x-auto pb-1 scrollbar-none">
+          {(["upcoming", "history", "subscription", "payments", "preferences"] as const).map(tab => (
             <button
               key={tab}
               data-testid={`button-tab-${tab}`}
               onClick={() => setActiveTab(tab)}
-              className={`font-semibold text-sm tracking-wider uppercase border-b-2 pb-3 transition-colors ${
+              className={`font-semibold text-sm tracking-wider uppercase border-b-2 pb-3 transition-colors whitespace-nowrap ${
                 activeTab === tab
-                  ? "text-[#1e88e5] border-[#1e88e5]"
+                  ? "text-[#f84464] border-[#f84464]"
                   : "text-gray-500 border-transparent hover:text-white"
               }`}>
-              {tab}
+              {tab === "history" ? "History" : tab === "subscription" ? "Subscription" : tab === "payments" ? "Payments" : tab}
             </button>
           ))}
         </div>
@@ -199,21 +214,184 @@ export default function Profile() {
         )}
 
         {activeTab === "history" && (
-          <div className="space-y-4">
-            <h2 className="font-display font-bold text-lg text-white mb-4">Watch History</h2>
-            <div className="glass-card rounded-xl p-4 flex gap-4 opacity-75">
-              <img src={pastMovie.posterUrl} alt="Poster" className="w-14 h-20 object-cover rounded-md grayscale" />
-              <div className="flex-1 flex flex-col justify-center">
-                <h3 className="font-bold text-white text-base">{pastMovie.title}</h3>
-                <p className="text-xs text-gray-400 mt-1">March 12, 2026 • Standard</p>
-                <p className="text-xs text-gray-500 mt-0.5">Seats: C3, C4 • ₹760</p>
-                <Link href={`/movies/${pastMovie.id}`}>
-                  <button className="text-xs text-[#1e88e5] font-semibold uppercase tracking-wider mt-2 flex items-center gap-1 hover:text-white transition-colors w-max">
-                    <RotateCcw className="w-3 h-3" /> Book Again
-                  </button>
-                </Link>
+          <div className="space-y-6">
+            <div>
+              <h2 className="font-display font-bold text-lg text-white mb-4">Watch History (Streams)</h2>
+              {getWatchHistory().length === 0 ? (
+                <p className="text-sm text-gray-500 bg-white/[0.02] border border-white/5 rounded-xl p-4 text-center">No streamed movies watched yet.</p>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {getWatchHistory().map((wh, idx) => {
+                    const matchMovie = allMovies.find(m => m.id === wh.movieId);
+                    return (
+                      <div key={idx} className="glass-card rounded-xl p-4 flex gap-4">
+                        <img 
+                          src={matchMovie?.posterUrl || "https://images.unsplash.com/photo-1440404653325-ab127d49abc1"} 
+                          alt="Poster" 
+                          className="w-12 h-16 object-cover rounded" 
+                        />
+                        <div className="flex-1 flex flex-col justify-center min-w-0">
+                          <h4 className="font-bold text-white text-sm truncate">{wh.movieTitle}</h4>
+                          <p className="text-[10px] text-gray-500 mt-1">
+                            Watched on {new Date(wh.watchedAt).toLocaleDateString("en-IN")}
+                          </p>
+                          <Link href={`/watch/${wh.movieId}`} className="text-xs text-[#f84464] font-bold mt-2 hover:underline">
+                            Watch Again
+                          </Link>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="h-px bg-white/5 w-full my-4" />
+
+            <div>
+              <h2 className="font-display font-bold text-lg text-white mb-4">Past Theater Bookings</h2>
+              <div className="glass-card rounded-xl p-4 flex gap-4 opacity-75">
+                <img src={pastMovie.posterUrl} alt="Poster" className="w-14 h-20 object-cover rounded-md grayscale" />
+                <div className="flex-1 flex flex-col justify-center">
+                  <h3 className="font-bold text-white text-base">{pastMovie.title}</h3>
+                  <p className="text-xs text-gray-400 mt-1">March 12, 2026 • Standard</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Seats: C3, C4 • ₹760</p>
+                  <Link href={`/movies/${pastMovie.id}`}>
+                    <button className="text-xs text-[#1e88e5] font-semibold uppercase tracking-wider mt-2 flex items-center gap-1 hover:text-white transition-colors w-max">
+                      <RotateCcw className="w-3 h-3" /> Book Again
+                    </button>
+                  </Link>
+                </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {activeTab === "subscription" && (
+          <div className="max-w-2xl space-y-6">
+            <h2 className="font-display font-bold text-lg text-white">My VIP Subscription</h2>
+            
+            {getSubscription() ? (
+              <div className="glass-card rounded-2xl border border-white/10 p-6 space-y-6 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#f84464] rounded-full blur-[80px] opacity-10 pointer-events-none" />
+                
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                      getSubscription()?.status === "active" 
+                        ? "bg-green-500/15 border border-green-500/30 text-green-400"
+                        : "bg-red-500/15 border border-red-500/30 text-red-400"
+                    }`}>
+                      {getSubscription()?.status}
+                    </span>
+                    <h3 className="font-display font-bold text-2xl text-white mt-2 capitalize">{getSubscription()?.planId} Plan</h3>
+                    <p className="text-xs text-gray-500 mt-1">Billing Cycle: {getSubscription()?.billingCycle}</p>
+                  </div>
+                  
+                  <div className="text-right">
+                    <span className="text-xs text-gray-500">Next Billing Date</span>
+                    <p className="font-bold text-sm text-white mt-1">
+                      {getSubscription()?.endDate ? new Date(getSubscription()!.endDate).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }) : "N/A"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="h-px bg-white/5 w-full" />
+
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <h4 className="text-sm font-semibold text-white">Auto-Renew</h4>
+                    <p className="text-xs text-gray-500 mt-0.5">Toggle auto-renewal of your subscription plan</p>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      toggleAutoRenew();
+                      // Force update
+                      setActiveTab("subscription");
+                    }}
+                    className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                      getSubscription()?.autoRenew 
+                        ? "bg-green-500/15 border border-green-500/35 text-green-400"
+                        : "bg-white/5 border border-white/10 text-gray-400 hover:text-white"
+                    }`}
+                  >
+                    {getSubscription()?.autoRenew ? "Enabled" : "Disabled"}
+                  </button>
+                </div>
+
+                {getSubscription()?.status === "active" && (
+                  <>
+                    <div className="h-px bg-white/5 w-full" />
+                    <div className="flex justify-end pt-2">
+                      <button 
+                        onClick={() => {
+                          if (confirm("Are you sure you want to cancel your subscription? You will lose all VIP benefits at the end of your billing cycle.")) {
+                            cancelSubscription();
+                            setActiveTab("subscription");
+                          }
+                        }}
+                        className="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/45 text-red-400 text-xs font-bold rounded-xl transition-all"
+                      >
+                        Cancel Subscription
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="glass-card rounded-2xl border border-white/5 p-8 text-center space-y-4">
+                <p className="text-gray-400 text-sm">You do not have an active subscription right now.</p>
+                <Link href="/subscribe" className="btn-hs-primary text-xs py-2.5 px-6 inline-flex justify-center">
+                  SUBSCRIBE NOW
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "payments" && (
+          <div className="space-y-4">
+            <h2 className="font-display font-bold text-lg text-white mb-4">Payment History</h2>
+            {getPaymentHistory().length === 0 ? (
+              <div className="glass-card rounded-2xl p-8 text-center text-gray-500 text-sm border border-white/5">
+                No payments recorded yet.
+              </div>
+            ) : (
+              <div className="glass-card rounded-2xl border border-white/5 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-white/8 text-gray-400 bg-white/[0.02]">
+                        <th className="py-3 px-4 font-semibold">Transaction ID</th>
+                        <th className="py-3 px-4 font-semibold">Description</th>
+                        <th className="py-3 px-4 font-semibold">Amount</th>
+                        <th className="py-3 px-4 font-semibold">Method</th>
+                        <th className="py-3 px-4 font-semibold">Status</th>
+                        <th className="py-3 px-4 font-semibold">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {getPaymentHistory().map((p) => (
+                        <tr key={p.id} className="border-b border-white/5 hover:bg-white/4">
+                          <td className="py-3 px-4 font-mono text-[10px] text-gray-400">{p.transactionId}</td>
+                          <td className="py-3 px-4 text-white font-medium">{p.description}</td>
+                          <td className="py-3 px-4 font-mono font-bold text-[#ffc107]">₹{p.amount}</td>
+                          <td className="py-3 px-4 uppercase text-gray-400 text-[10px]">{p.method}</td>
+                          <td className="py-3 px-4">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-green-500/15 text-green-400">
+                              {p.status}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-gray-400">
+                            {new Date(p.timestamp).toLocaleDateString("en-IN")}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

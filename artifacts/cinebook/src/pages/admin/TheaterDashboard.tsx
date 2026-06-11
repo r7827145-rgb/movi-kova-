@@ -26,6 +26,7 @@ export default function TheaterDashboard() {
     title: "", genre: "", synopsis: "", rating: "UA", year: 2026,
     duration: 120, score: 80, director: "", posterUrl: "", backdropUrl: "",
     isNowShowing: true, isComingSoon: false,
+    isStreamable: false, isPremium: false, streamUrl: "",
   });
 
   useEffect(() => {
@@ -57,10 +58,17 @@ export default function TheaterDashboard() {
       backdropUrl: reqForm.backdropUrl,
       isNowShowing: reqForm.isNowShowing,
       isComingSoon: reqForm.isComingSoon,
+      isStreamable: reqForm.isStreamable,
+      isPremium: reqForm.isPremium,
+      streamUrl: reqForm.streamUrl,
     });
     setMyRequests(getMovieRequests().filter(r => r.theaterId === theaterId));
     setShowRequestForm(false);
-    setReqForm({ title: "", genre: "", synopsis: "", rating: "UA", year: 2026, duration: 120, score: 80, director: "", posterUrl: "", backdropUrl: "", isNowShowing: true, isComingSoon: false });
+    setReqForm({
+      title: "", genre: "", synopsis: "", rating: "UA", year: 2026, duration: 120, score: 80,
+      director: "", posterUrl: "", backdropUrl: "", isNowShowing: true, isComingSoon: false,
+      isStreamable: false, isPremium: false, streamUrl: "",
+    });
   };
 
   const assignedMovieIds = theater?.moviesAssigned || [];
@@ -217,6 +225,13 @@ export default function TheaterDashboard() {
                           />
                         </div>
                       ))}
+                      <div>
+                        <label className="text-[11px] text-gray-400 uppercase tracking-wider mb-1 block">Stream Video URL (MP4 / HLS)</label>
+                        <input type="text" value={reqForm.streamUrl} placeholder="e.g. https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                          onChange={e => setReqForm(f => ({ ...f, streamUrl: e.target.value }))}
+                          className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#f84464]"
+                        />
+                      </div>
                       <div className="grid grid-cols-3 gap-3">
                         {([["Year", "year"], ["Duration (min)", "duration"], ["Score", "score"]] as [string, string][]).map(([label, key]) => (
                           <div key={key}>
@@ -227,8 +242,8 @@ export default function TheaterDashboard() {
                           </div>
                         ))}
                       </div>
-                      <div className="flex gap-4">
-                        {[["Now Showing", "isNowShowing"], ["Coming Soon", "isComingSoon"]].map(([label, key]) => (
+                      <div className="flex flex-wrap gap-4 pt-1">
+                        {[["Now Showing", "isNowShowing"], ["Coming Soon", "isComingSoon"], ["Streamable", "isStreamable"], ["Premium (Sub Only)", "isPremium"]].map(([label, key]) => (
                           <label key={key} className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
                             <input type="checkbox" checked={(reqForm as any)[key]} onChange={e => setReqForm(f => ({ ...f, [key]: e.target.checked }))} className="accent-[#f84464]" />
                             {label}

@@ -1,4 +1,4 @@
-import { movies } from "../data/movies";
+import { getAllMovies } from "../lib/adminData";
 import Navbar from "../components/Navbar";
 import MovieCard from "../components/MovieCard";
 import AILauncher from "../components/AILauncher";
@@ -10,7 +10,8 @@ import { useState } from "react";
 import { clsx } from "clsx";
 
 export default function Home() {
-  const featured = movies[0];
+  const movies = getAllMovies();
+  const featured = movies[0] || { backdropUrl: "", title: "", score: 0, rating: "", genre: [], id: "" };
   const nowShowing = movies.filter(m => m.isNowShowing);
   const comingSoon = movies.filter(m => m.isComingSoon);
   const trending = movies.slice(0, 4);

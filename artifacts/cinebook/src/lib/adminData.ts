@@ -1,3 +1,5 @@
+import { movies as seedMovies, Movie } from "../data/movies";
+
 export interface Theater {
   id: string;
   name: string;
@@ -37,6 +39,9 @@ export interface CustomMovie {
   isNowShowing: boolean;
   isComingSoon: boolean;
   isCustom: true;
+  streamUrl?: string;
+  isStreamable?: boolean;
+  isPremium?: boolean;
 }
 
 export interface MovieRequest {
@@ -58,6 +63,9 @@ export interface MovieRequest {
   status: "pending" | "approved" | "rejected";
   submittedAt: string;
   reviewedAt?: string;
+  streamUrl?: string;
+  isStreamable?: boolean;
+  isPremium?: boolean;
 }
 
 export interface AdminSession {
@@ -150,6 +158,7 @@ export const approveMovieRequest = (id: string): void => {
     rating: r.rating, year: r.year, duration: r.duration, score: r.score,
     director: r.director, posterUrl: r.posterUrl, backdropUrl: r.backdropUrl,
     isNowShowing: r.isNowShowing, isComingSoon: r.isComingSoon, isCustom: true,
+    streamUrl: r.streamUrl, isStreamable: r.isStreamable, isPremium: r.isPremium,
   });
 };
 
@@ -196,4 +205,35 @@ export const getTotalRevenue = (): number => {
   return getBookings()
     .filter(b => b.status !== "CANCELLED")
     .reduce((sum, b) => sum + b.total, 0);
+};
+
+export const getAllMovies = (): Movie[] => {
+  const custom = getCustomMovies();
+  const mappedCustom: Movie[] = custom.map(m => ({
+    id: m.id,
+    title: m.title,
+    tagline: m.synopsis.slice(0, 50) + "...",
+    synopsis: m.synopsis,
+    genre: m.genre,
+    rating: m.rating,
+    duration: m.duration,
+    year: m.year,
+    director: m.director,
+    cast: [],
+    posterUrl: m.posterUrl || "https://images.unsplash.com/photo-1440404653325-ab127d49abc1",
+    backdropUrl: m.backdropUrl || "https://images.unsplash.com/photo-1440404653325-ab127d49abc1",
+    trailerYoutubeId: "",
+    score: m.score,
+    showtimes: [
+      { id: `st_${m.id}_1`, time: "12:00 PM", date: new Date().toISOString().split('T')[0], format: "Standard", price: 250, hallName: "Audi 1" },
+      { id: `st_${m.id}_2`, time: "4:00 PM", date: new Date().toISOString().split('T')[0], format: "Standard", price: 250, hallName: "Audi 1" },
+      { id: `st_${m.id}_3`, time: "8:00 PM", date: new Date().toISOString().split('T')[0], format: "Standard", price: 250, hallName: "Audi 1" },
+    ],
+    isNowShowing: m.isNowShowing,
+    isComingSoon: m.isComingSoon,
+    streamUrl: m.streamUrl,
+    isStreamable: m.isStreamable,
+    isPremium: m.isPremium,
+  }));
+  return [...seedMovies, ...mappedCustom];
 };

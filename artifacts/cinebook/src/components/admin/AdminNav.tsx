@@ -14,7 +14,7 @@ export default function AdminNav({ activeTab, onTabChange }: AdminNavProps) {
   const adminTabs = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "financial", label: "Financial", icon: TrendingUp },
-    { id: "movies", label: "Movies", icon: Film },
+    { id: "movies", label: "Movie Control", icon: Film },
     { id: "theaters", label: "Theaters", icon: Building2 },
     { id: "bookings", label: "Bookings", icon: Ticket },
     { id: "users", label: "Users", icon: Users },

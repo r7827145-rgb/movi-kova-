@@ -16,6 +16,8 @@ import MovieDetail from "./pages/MovieDetail";
 import SeatPicker from "./pages/SeatPicker";
 import Checkout from "./pages/Checkout";
 import Profile from "./pages/Profile";
+import WatchMovie from "./pages/WatchMovie";
+import SubscriptionPlans from "./pages/SubscriptionPlans";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import TheaterDashboard from "./pages/admin/TheaterDashboard";
@@ -169,6 +171,22 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/movies/:id" component={MovieDetail} />
         <Route path="/movies/:id/seats" component={SeatPicker} />
+        <Route path="/watch/:id">
+          {(params) => (
+            <>
+              <Show when="signed-in"><WatchMovie params={params} /></Show>
+              <Show when="signed-out"><SignInRedirect /></Show>
+            </>
+          )}
+        </Route>
+        <Route path="/subscribe">
+          {() => (
+            <>
+              <Show when="signed-in"><SubscriptionPlans /></Show>
+              <Show when="signed-out"><SignInRedirect /></Show>
+            </>
+          )}
+        </Route>
         <Route path="/checkout">
           {() => (
             <>

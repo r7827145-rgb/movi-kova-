@@ -33,6 +33,9 @@ export interface Movie {
   showtimes: Showtime[];
   isNowShowing: boolean;
   isComingSoon: boolean;
+  streamUrl?: string;
+  isStreamable?: boolean;
+  isPremium?: boolean;
 }
 
 const today = new Date().toISOString().split('T')[0];
@@ -65,7 +68,10 @@ export const movies: Movie[] = [
       { id: "s4", time: "15:00", date: tomorrow, format: "IMAX", price: 24, hallName: "SCREEN 1" }
     ],
     isNowShowing: true,
-    isComingSoon: false
+    isComingSoon: false,
+    streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+    isStreamable: true,
+    isPremium: true
   },
   {
     id: "missionx",
@@ -92,7 +98,10 @@ export const movies: Movie[] = [
       { id: "s7", time: "19:00", date: tomorrow, format: "4DX", price: 26, hallName: "SCREEN 2" }
     ],
     isNowShowing: true,
-    isComingSoon: false
+    isComingSoon: false,
+    streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    isStreamable: true,
+    isPremium: false
   },
   {
     id: "andromeda",
@@ -117,7 +126,10 @@ export const movies: Movie[] = [
       { id: "s9", time: "22:00", date: today, format: "Standard", price: 16, hallName: "SCREEN 3" }
     ],
     isNowShowing: true,
-    isComingSoon: false
+    isComingSoon: false,
+    streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    isStreamable: true,
+    isPremium: true
   },
   {
     id: "phantom",
@@ -142,7 +154,10 @@ export const movies: Movie[] = [
       { id: "s11", time: "23:30", date: today, format: "Standard", price: 16, hallName: "SCREEN 6" }
     ],
     isNowShowing: true,
-    isComingSoon: false
+    isComingSoon: false,
+    streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    isStreamable: true,
+    isPremium: true
   },
   {
     id: "solstice",
@@ -167,7 +182,9 @@ export const movies: Movie[] = [
       { id: "s13", time: "15:45", date: tomorrow, format: "Standard", price: 14, hallName: "SCREEN 7" }
     ],
     isNowShowing: false,
-    isComingSoon: true
+    isComingSoon: true,
+    isStreamable: false,
+    isPremium: false
   },
   {
     id: "ironclad",
@@ -192,6 +209,8 @@ export const movies: Movie[] = [
       { id: "s15", time: "22:15", date: tomorrow, format: "Standard", price: 18, hallName: "SCREEN 4" }
     ],
     isNowShowing: false,
-    isComingSoon: true
+    isComingSoon: true,
+    isStreamable: false,
+    isPremium: false
   }
 ];

@@ -118,6 +118,7 @@ export default function Navbar() {
 
           <div className="hidden md:flex items-center gap-6 text-[13px] font-semibold tracking-widest uppercase ml-auto">
             <Link href="/" className={clsx("transition-colors", location === "/" ? "bms-tab-active" : "bms-tab")} data-testid="link-nav-movies">MOVIES</Link>
+            <Link href="/subscribe" className={clsx("transition-colors flex items-center gap-1 text-[#f84464] hover:text-white font-bold", location === "/subscribe" ? "bms-tab-active" : "")} data-testid="link-nav-subscribe">VIP/STREAM</Link>
             <Link href="/events" className={clsx("transition-colors", location === "/events" ? "bms-tab-active" : "bms-tab")}>EVENTS</Link>
             <Link href="/plays" className={clsx("transition-colors", location === "/plays" ? "bms-tab-active" : "bms-tab")}>PLAYS</Link>
             <Link href="/sports" className={clsx("transition-colors", location === "/sports" ? "bms-tab-active" : "bms-tab")}>SPORTS</Link>

@@ -17,6 +17,7 @@ export default function MobileMenu({ open, onOpenChange }: MobileMenuProps) {
         
         <div className="flex flex-col gap-6 text-[15px] font-semibold tracking-widest text-gray-300 uppercase">
           <Link href="/" onClick={() => onOpenChange(false)} className="hover:text-[#f84464] transition-colors" data-testid="link-mobile-nav-home">HOME</Link>
+          <Link href="/subscribe" onClick={() => onOpenChange(false)} className="hover:text-[#f84464] transition-colors text-[#f84464] font-bold" data-testid="link-mobile-nav-subscribe">VIP/STREAM</Link>
           <Link href="/" onClick={() => onOpenChange(false)} className="hover:text-[#f84464] transition-colors" data-testid="link-mobile-nav-movies">MOVIES</Link>
           <Link href="/events" onClick={() => onOpenChange(false)} className="hover:text-[#f84464] transition-colors" data-testid="link-mobile-nav-events">EVENTS</Link>
           <Link href="/plays" onClick={() => onOpenChange(false)} className="hover:text-[#f84464] transition-colors" data-testid="link-mobile-nav-plays">PLAYS</Link>
